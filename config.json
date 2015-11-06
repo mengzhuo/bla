@@ -1,0 +1,10 @@
+{"address":":7080",
+ "base_url":"http://10.5.4.152",
+"base_root":"10.5.4.152",
+"username":"m",
+"password":"p",
+"home_articles":3,
+"content_path":"./content",
+"template_path":"./template",
+"public_path":"./public",
+"theme_path":"./theme"}
