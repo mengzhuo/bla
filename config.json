@@ -1,5 +1,5 @@
 {"address":":7080",
- "base_url":"http://10.5.4.152",
+ "base_url":"http://localhost:7080",
 "base_root":"10.5.4.152",
 "username":"m",
 "password":"p",
