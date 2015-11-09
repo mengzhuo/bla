@@ -1,0 +1,6 @@
+{{define "title"}}{{ .Cfg.Title }}{{end}}
+{{define "content"}}
+{{ range .Docs }}
+    .HTML
+{{end}}
+{{end}}

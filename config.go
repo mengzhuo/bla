@@ -10,7 +10,8 @@ type Config struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 
-	HomeArticles int `json:"home_articles"`
+	HomeArticles int    `json:"home_articles"`
+	Title        string `json:"title"`
 
 	ContentPath  string `json:"content_path"`
 	TemplatePath string `json:"template_path"`

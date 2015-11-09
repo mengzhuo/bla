@@ -1,5 +1,6 @@
-{"address":":7080",
- "base_url":"http://localhost:7080",
+{
+"address":":7080",
+"base_url":"http://localhost:7080",
 "base_root":"10.5.4.152",
 "username":"m",
 "password":"p",
@@ -7,4 +8,6 @@
 "content_path":"./content",
 "template_path":"./template",
 "public_path":"./public",
-"theme_path":"./theme"}
+"theme_path":"./theme",
+"title":"Test Blog"
+}
