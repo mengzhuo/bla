@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"text/template"
 )
@@ -32,6 +31,7 @@ func New() {
 
 	LFatal(server.LoadTempalte())
 	server.LoadAllDocs()
+	LFatal(server.SaveAllDocs())
 	server.MakeHome()
 	Log(Cfg)
 
@@ -39,30 +39,19 @@ func New() {
 
 func (s *Server) LoadTempalte() (err error) {
 
-	root := filepath.Join(Cfg.TemplatePath, "root.tmpl")
-	parse := func(name string) (*template.Template, error) {
-		t := template.New("")
-		return t.ParseFiles(root, filepath.Join(Cfg.TemplatePath, name))
-	}
-
-	s.template.home, err = parse("home.tmpl")
-	if err != nil {
-		return
-	}
+	tp := filepath.Join(Cfg.TemplatePath, "*.tmpl")
+	Log(tp)
+	s.template, err = template.ParseGlob(tp)
 	return
 }
 
 type Server struct {
 	docs     []*Doc
 	Tags     map[string][]*Doc
-	template struct{ home *template.Template }
+	template *template.Template
 }
 
-type rootData struct {
-	Cfg  *Config
-	Docs []*Doc
-}
-
+/*
 func (s *Server) MakeHome() {
 	r := &rootData{Cfg: Cfg}
 	n := Cfg.HomeArticles
@@ -76,5 +65,6 @@ func (s *Server) MakeHome() {
 		LErr(err)
 		return
 	}
-	LErr(s.template.home.ExecuteTemplate(f, "", r))
+	//LErr(s.template.home.ExecuteTemplate(f, "", r))
 }
+*/

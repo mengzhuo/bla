@@ -1,11 +1,16 @@
+{{define "root"}}
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width">
-        <title>{{ title }}</title>
+        <title>{{ .Title }}{{ .Cfg.Title}}</title>
+        
     </head>
     <body>
-    {{ content }}
+    {{ .Content }}
+    {{ .Append }}
     </body>
 </html>
+
+{{end}}
