@@ -8,6 +8,5 @@
 "content_path":"./content",
 "template_path":"./template",
 "public_path":"./public",
-"theme_path":"./theme",
 "title":"Test Blog"
 }

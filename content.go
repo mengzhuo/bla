@@ -1,8 +1,8 @@
 package bla
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -18,6 +18,7 @@ type Doc struct {
 	Time       time.Time
 	Tags       []string
 	Parsed     *goquery.Document
+	Related    []*Doc
 }
 
 func (d *Doc) String() string {
@@ -70,44 +71,84 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 			s.Tags[t] = []*Doc{doc}
 		}
 	})
+	// Make header links
+	header.ReplaceWithHtml(fmt.Sprintf(`<h1 class="title"><a href="%s">%s</a></h1>`, doc.Path, doc.Title))
 
 	Log(doc)
 	doc.Parsed = parsed
-
+	doc.Related = make([]*Doc, 0)
 	s.docs = append(s.docs, doc)
 	return
+}
+
+func (s *Server) makeRelated(d *Doc, t string) {
+
+	for _, rd := range s.Tags[t] {
+		if !docInDocs(rd, d.Related) {
+			d.Related = append(d.Related, rd)
+		}
+
+	}
+
 }
 
 func (s *Server) LoadAllDocs() (err error) {
 
 	filepath.Walk(Cfg.ContentPath, s.LoadDoc)
 	sort.Sort(docsByTime(s.docs))
+
+	// make related doc
+
+	for _, d := range s.docs {
+		for _, t := range d.Tags {
+			s.makeRelated(d, t)
+		}
+	}
+
 	return
 }
 
 type rootData struct {
-	Title   string
-	Content string
-	Append  string
-	Cfg     *Config
+	Cfg    *Config
+	Server *Server
+	Docs   []*Doc
+}
+
+func (s *Server) newRootData() *rootData {
+	return &rootData{Server: s, Cfg: Cfg}
+}
+
+func docInDocs(doc *Doc, docs []*Doc) bool {
+
+	for _, d := range docs {
+		if d.Title == doc.Title {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Server) MakeDocAppend(doc *Doc) (app string) {
+
+	buf := bytes.NewBuffer([]byte{})
+
+	for _, d := range doc.Related {
+
+		fmt.Fprintf(buf, `<a href="%s" class="related">%s</a> `, d.Path, d.Title)
+		doc.Related = append(doc.Related, d)
+	}
+	return buf.String()
 }
 
 func (s *Server) SaveAllDocs() (err error) {
 	for _, d := range s.docs {
 
-		// Make header links
-		d.headerNode.ReplaceWithHtml(fmt.Sprintf(`<h1 class="title"><a href="%s">%s</a></h1>`, d.Path, d.Title))
-
-		// get HTML
-		html, err := d.Parsed.First().Html()
-		if err != nil {
-			LErr(err)
-			continue
-		}
-		r := rootData{Title: d.Title + "-", Content: html, Cfg: Cfg}
+		r := s.newRootData()
+		r.Docs = []*Doc{d}
 
 		f, err := os.Create(fmt.Sprintf("%s/%s", Cfg.PublicPath, d.Title))
-		LErr(s.template.ExecuteTemplate(f, "doc", r))
+		LErr(err)
+		LErr(s.template.doc.ExecuteTemplate(f, "root", r))
 		f.Close()
 	}
 
@@ -117,17 +158,16 @@ func (s *Server) SaveAllDocs() (err error) {
 
 func (s *Server) MakeHome() (err error) {
 
-	html := ""
-	for _, d := range s.docs {
-		p, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", Cfg.PublicPath, d.Title))
-		LErr(err)
-		html += string(p)
+	n := Cfg.HomeArticles
+	if len(s.docs) < Cfg.HomeArticles {
+		n = len(s.docs)
 	}
+	r := s.newRootData()
 
-	r := rootData{Content: html, Cfg: Cfg}
+	r.Docs = s.docs[0:n]
 
 	f, err := os.Create(fmt.Sprintf("%s/%s", Cfg.PublicPath, "index.html"))
-	LErr(s.template.ExecuteTemplate(f, "doc", r))
+	LErr(s.template.home.ExecuteTemplate(f, "root", r))
 	return
 }
 

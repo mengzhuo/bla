@@ -4,13 +4,24 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width">
-        <title>{{ .Title }}{{ .Cfg.Title}}</title>
-        
+        <title>{{ template "title" . }}</title>
+        {{range $path := .Server.StaticFiles}}
+        <link rel="stylesheet" href="/static/{{$path | base}}">
+        {{end}} 
     </head>
     <body>
-    {{ .Content }}
-    {{ .Append }}
+    {{ template "content" . }}
     </body>
 </html>
+{{end}}
 
+{{define "doc"}}
+{{ .Parsed.First.Html }}
+{{range .Related }}
+    <a href="{{ .Path }}" class="related">{{ .Title }}</a> 
+{{end}}
+{{end}}
+
+{{define "shortdoc"}}
+{{ .Parsed.First.Html }}
 {{end}}

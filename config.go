@@ -17,5 +17,4 @@ type Config struct {
 	TemplatePath string `json:"template_path"`
 
 	PublicPath string `json:"public_path"` // all parsed html/content etc...
-	StaticPath string `json:"static_path"` // css, js etc..
 }

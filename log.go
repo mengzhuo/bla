@@ -21,6 +21,6 @@ func LErr(arg interface{}) {
 
 }
 
-func Log(arg interface{}) {
-	log.Print(arg)
+func Log(arg ...interface{}) {
+	log.Print(arg...)
 }
