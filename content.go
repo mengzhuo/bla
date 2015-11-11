@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -21,6 +22,10 @@ type Doc struct {
 	Related    []*Doc
 }
 
+func santiSpace(s string) string {
+	return strings.Replace(s, " ", "-", -1)
+}
+
 func (d *Doc) String() string {
 	return fmt.Sprintf("Path:%s Title:%s Time:%s Tags:%s", d.Path, d.Title, d.Time, d.Tags)
 }
@@ -28,6 +33,10 @@ func (d *Doc) String() string {
 func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 
 	if !info.Mode().IsRegular() {
+		return
+	}
+
+	if strings.HasPrefix(filepath.Base(path), ".") {
 		return
 	}
 
@@ -50,10 +59,10 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 	header := parsed.Find("h1").First()
 	doc.Title = header.Text()
 	doc.headerNode = header
-	doc.Path = Cfg.BasePath + doc.Title
+	doc.Path = Cfg.BasePath + santiSpace(doc.Title)
 
-	if t := parsed.Find("#datetime").First().Text(); t != "" {
-		doc.Time, err = time.Parse("2012-01-02T10:04:05", t)
+	if t := parsed.Find(".date").First().Text(); t != "" {
+		doc.Time, err = time.Parse("2006-01-02", t)
 		if err != nil {
 			LErr(err)
 			return
@@ -146,7 +155,7 @@ func (s *Server) SaveAllDocs() (err error) {
 		r := s.newRootData()
 		r.Docs = []*Doc{d}
 
-		f, err := os.Create(fmt.Sprintf("%s/%s", Cfg.PublicPath, d.Title))
+		f, err := os.Create(fmt.Sprintf("%s/%s", Cfg.PublicPath, santiSpace(d.Title)))
 		LErr(err)
 		LErr(s.template.doc.ExecuteTemplate(f, "root", r))
 		f.Close()

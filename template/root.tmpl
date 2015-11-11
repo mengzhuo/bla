@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width">
         <title>{{ template "title" . }}</title>
         {{range $path := .Server.StaticFiles}}
-        <link rel="stylesheet" href="/static/{{$path | base}}">
+        <link rel="stylesheet" href="/asset/{{$path | base}}">
         {{end}} 
     </head>
     <body>

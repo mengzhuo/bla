@@ -7,8 +7,8 @@ type Config struct {
 	BaseRoot string `json:"base_root"`
 	BasePath string `json:"base_path"`
 
-	Username string `json:"username"`
-	Password string `json:"password"`
+	username string `json:"username"`
+	password string `json:"password"`
 
 	HomeArticles int    `json:"home_articles"`
 	Title        string `json:"title"`

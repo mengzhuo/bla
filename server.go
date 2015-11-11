@@ -38,16 +38,16 @@ func New() {
 
 func (s *Server) LoadStaticFiles() {
 
-	Log("Rebuild Static: ", Cfg.TemplatePath)
+	Log("Rebuild from: ", Cfg.TemplatePath)
 	LErr(os.RemoveAll(Cfg.PublicPath))
 	LErr(os.MkdirAll(Cfg.PublicPath, 0755))
-	orig, err := filepath.Abs(filepath.Join(Cfg.TemplatePath, "static"))
-	dest, err := filepath.Abs(filepath.Join(Cfg.PublicPath, "static"))
+	orig, err := filepath.Abs(filepath.Join(Cfg.TemplatePath, "asset"))
+	dest, err := filepath.Abs(filepath.Join(Cfg.PublicPath, "asset"))
 	LErr(err)
 
-	Log("Link:", orig, " -> ", dest)
+	Log("Rebuild link:", orig, " -> ", dest)
 	LErr(os.Symlink(orig, dest))
-
+	Log("Loading Asset files")
 	filepath.Walk(orig,
 		func(path string, info os.FileInfo, e error) (err error) {
 
