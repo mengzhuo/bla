@@ -12,6 +12,7 @@ type Config struct {
 
 	HomeArticles int    `json:"home_articles"`
 	Title        string `json:"title"`
+	Footer       string `json:"footer"`
 
 	ContentPath  string `json:"content_path"`
 	TemplatePath string `json:"template_path"`

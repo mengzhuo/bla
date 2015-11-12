@@ -13,6 +13,7 @@ import (
 )
 
 type Doc struct {
+	RealPath   string // as id
 	Path       string
 	Title      string
 	headerNode *goquery.Selection
@@ -40,7 +41,7 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 		return
 	}
 
-	Log(path)
+	//Log(path)
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -49,7 +50,7 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 	}
 	defer f.Close()
 
-	doc := &Doc{}
+	doc := &Doc{RealPath: path}
 	parsed, err := goquery.NewDocumentFromReader(f)
 	if err != nil {
 		LErr(err)
@@ -83,7 +84,7 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 	// Make header links
 	header.ReplaceWithHtml(fmt.Sprintf(`<h1 class="title"><a href="%s">%s</a></h1>`, doc.Path, doc.Title))
 
-	Log(doc)
+	//Log(doc)
 	doc.Parsed = parsed
 	doc.Related = make([]*Doc, 0)
 	s.docs = append(s.docs, doc)
@@ -92,27 +93,27 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 
 func (s *Server) makeRelated(d *Doc, t string) {
 
-	for _, rd := range s.Tags[t] {
-		if !docInDocs(rd, d.Related) {
-			d.Related = append(d.Related, rd)
+	for _, d := range s.docs {
+		for _, t := range d.Tags {
+			for _, rd := range s.Tags[t] {
+				if !docInDocs(rd, d.Related) && rd != d {
+					d.Related = append(d.Related, rd)
+				}
+			}
 		}
-
 	}
-
 }
 
 func (s *Server) LoadAllDocs() (err error) {
 
-	filepath.Walk(Cfg.ContentPath, s.LoadDoc)
+	start := time.Now()
+
+	filepath.Walk(filepath.Clean(Cfg.ContentPath), s.LoadDoc)
 	sort.Sort(docsByTime(s.docs))
 
 	// make related doc
 
-	for _, d := range s.docs {
-		for _, t := range d.Tags {
-			s.makeRelated(d, t)
-		}
-	}
+	Log(fmt.Sprintf("Load %d docs in %s", len(s.docs), time.Since(start)))
 
 	return
 }
@@ -166,7 +167,7 @@ func (s *Server) SaveAllDocs() (err error) {
 }
 
 func (s *Server) MakeHome() (err error) {
-
+	Log("making home of ", len(s.docs))
 	n := Cfg.HomeArticles
 	if len(s.docs) < Cfg.HomeArticles {
 		n = len(s.docs)
@@ -176,6 +177,7 @@ func (s *Server) MakeHome() (err error) {
 	r.Docs = s.docs[0:n]
 
 	f, err := os.Create(fmt.Sprintf("%s/%s", Cfg.PublicPath, "index.html"))
+	LErr(err)
 	LErr(s.template.home.ExecuteTemplate(f, "root", r))
 	return
 }

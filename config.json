@@ -4,9 +4,10 @@
 "base_root":"10.5.4.152",
 "username":"m",
 "password":"p",
-"home_articles":3,
+"home_articles":10,
 "content_path":"./content",
 "template_path":"./template",
 "public_path":"./public",
-"title":"Test Blog"
+"title":"Test Blog",
+"footer":"Code is poetry"
 }

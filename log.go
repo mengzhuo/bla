@@ -6,17 +6,16 @@ func init() {
 	log.SetPrefix("[Bla] ")
 }
 
-func LFatal(arg interface{}) {
-
-	if arg != nil {
-		log.Fatal(arg)
+func LFatal(arg ...interface{}) {
+	if arg[0] != nil {
+		log.Fatal(arg...)
 	}
 }
 
-func LErr(arg interface{}) {
+func LErr(arg ...interface{}) {
 
-	if arg != nil {
-		log.Print("ERR", arg)
+	if arg[0] != nil {
+		log.Print(arg...)
 	}
 
 }

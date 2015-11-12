@@ -12,6 +12,8 @@ import (
 	"text/template"
 )
 
+const Version = "0.1 alpha"
+
 var (
 	Cfg        *Config
 	configPath = flag.String("c", "./config.json", "")
@@ -20,11 +22,13 @@ var (
 func New() {
 
 	flag.Parse()
-	LFatal(LoadConfig(*configPath))
+	LoadConfig(*configPath)
 
 	server := &Server{docs: make([]*Doc, 0),
 		Tags:        make(map[string][]*Doc, 0),
-		StaticFiles: make([]string, 0)}
+		StaticFiles: make([]string, 0),
+		Version:     Version,
+		StopWatch:   make(chan bool)}
 
 	LFatal(server.LoadTempalte())
 	server.LoadStaticFiles()
@@ -32,6 +36,7 @@ func New() {
 	LFatal(server.SaveAllDocs())
 	server.MakeHome()
 	Log(Cfg)
+	server.Watch()
 	http.Handle("/", http.FileServer(http.Dir(Cfg.PublicPath)))
 	http.ListenAndServe(Cfg.Addr, nil)
 }
@@ -95,4 +100,6 @@ type Server struct {
 	Tags        map[string][]*Doc
 	StaticFiles []string
 	template    struct{ home, doc *template.Template }
+	Version     string
+	StopWatch   chan bool
 }

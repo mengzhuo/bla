@@ -4,6 +4,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width">
+        <meta name="generator" content="Bla {{ .Server.Version }}" />
         <title>{{ template "title" . }}</title>
         {{range $path := .Server.StaticFiles}}
         {{with $pathExt := $path | ext }}
@@ -17,18 +18,41 @@
         {{end}} 
     </head>
     <body>
-    {{ template "content" . }}
+    <div id="topbar">
+        <h1><a href="{{ .Cfg.BaseURL }}">{{ .Cfg.Title }}</a></h1>
+    </div>
+    
+    <div id="container">
+        {{ template "content" . }}
+
+        <div id="footer">
+            {{ template "footer" . }}
+        </div>
+    </div>
     </body>
 </html>
 {{end}}
 
 {{define "doc"}}
-{{ .Parsed.First.Html }}
-{{range .Related }}
-    <a href="{{ .Path }}" class="related">{{ .Title }}</a> 
-{{end}}
+<article>
+    {{ .Parsed.First.Html }}
+    {{ $rl := len .Related }}
+    {{if gt $rl 0}}
+    <p>Related article:
+        <ul>
+        {{range .Related }}
+            <li><a href="{{ .Path }}" class="related">{{ .Title }}</a></li>
+        {{end}}
+        </ul>
+    </p>
+    {{ end }} 
+</article>
 {{end}}
 
 {{define "shortdoc"}}
 {{ .Parsed.First.Html }}
 {{end}}
+
+{{define "footer"}}
+<p>{{.Cfg.Footer}} | powered by <a href="https://github.com/mengzhuo/bla">Bla</a></p>
+{{ end }}
