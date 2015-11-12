@@ -74,6 +74,7 @@ func (s *Server) LoadTempalte() (err error) {
 
 	var funcMap = template.FuncMap{
 		"base": path.Base,
+		"ext":  filepath.Ext,
 	}
 	root := filepath.Join(Cfg.TemplatePath, "root.tmpl")
 	parsed := func(fname string) (t *template.Template) {
