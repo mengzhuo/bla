@@ -3,7 +3,6 @@ package bla
 import (
 	"os"
 	"path"
-	"sort"
 
 	"gopkg.in/fsnotify.v1"
 )
@@ -14,12 +13,6 @@ func (s *Server) RebuildDoc(e fsnotify.Event) {
 	if e.Op != fsnotify.Chmod {
 
 		p := path.Clean(e.Name)
-
-		for i, d := range s.docs {
-			if d.RealPath == p {
-				s.docs = append(s.docs[:i], s.docs[i+1:]...)
-			}
-		}
 
 		Log(p)
 
@@ -32,7 +25,6 @@ func (s *Server) RebuildDoc(e fsnotify.Event) {
 		}
 	}
 
-	sort.Sort(docsByTime(s.docs))
 	s.MakeHome()
 }
 

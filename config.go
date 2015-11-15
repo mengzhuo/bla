@@ -1,6 +1,18 @@
 // Package bla provides ...
 package bla
 
+import (
+	"encoding/json"
+	"flag"
+	"io/ioutil"
+	"path/filepath"
+)
+
+var (
+	Cfg        *Config
+	configPath = flag.String("c", "./config.json", "")
+)
+
 type Config struct {
 	Addr     string `json:"address"`
 	BaseURL  string `json:"base_url"`
@@ -18,4 +30,17 @@ type Config struct {
 	TemplatePath string `json:"template_path"`
 
 	PublicPath string `json:"public_path"` // all parsed html/content etc...
+}
+
+func LoadConfig(path string) (err error) {
+
+	d, err := ioutil.ReadFile(path)
+	LFatal(err)
+	err = json.Unmarshal(d, &Cfg)
+
+	// Clean
+	Cfg.ContentPath = filepath.Clean(Cfg.ContentPath)
+	Cfg.TemplatePath = filepath.Clean(Cfg.TemplatePath)
+	Cfg.PublicPath = filepath.Clean(Cfg.PublicPath)
+	return
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -87,13 +88,13 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 	//Log(doc)
 	doc.Parsed = parsed
 	doc.Related = make([]*Doc, 0)
-	s.docs = append(s.docs, doc)
+	s.Docs[doc.RealPath] = doc
 	return
 }
 
 func (s *Server) makeRelated(d *Doc, t string) {
 
-	for _, d := range s.docs {
+	for _, d := range s.Docs {
 		for _, t := range d.Tags {
 			for _, rd := range s.Tags[t] {
 				if !docInDocs(rd, d.Related) && rd != d {
@@ -108,12 +109,18 @@ func (s *Server) LoadAllDocs() (err error) {
 
 	start := time.Now()
 
-	filepath.Walk(filepath.Clean(Cfg.ContentPath), s.LoadDoc)
-	sort.Sort(docsByTime(s.docs))
+	filepath.Walk(Cfg.ContentPath, s.LoadDoc)
+
+	docs := make([]*Doc, 0)
+	for _, d := range s.Docs {
+		docs = append(docs, d)
+	}
+
+	sort.Sort(docsByTime(docs))
 
 	// make related doc
 
-	Log(fmt.Sprintf("Load %d docs in %s", len(s.docs), time.Since(start)))
+	Log(fmt.Sprintf("Load %d docs in %s", len(docs), time.Since(start)))
 
 	return
 }
@@ -151,32 +158,37 @@ func (s *Server) MakeDocAppend(doc *Doc) (app string) {
 }
 
 func (s *Server) SaveAllDocs() (err error) {
-	for _, d := range s.docs {
+	for _, d := range s.Docs {
 
 		r := s.newRootData()
 		r.Docs = []*Doc{d}
 
-		f, err := os.Create(fmt.Sprintf("%s/%s", Cfg.PublicPath, santiSpace(d.Title)))
+		f, err := os.Create(path.Join(Cfg.PublicPath, santiSpace(d.Title)))
 		LErr(err)
 		LErr(s.template.doc.ExecuteTemplate(f, "root", r))
 		f.Close()
 	}
 
-	//
 	return
 }
 
 func (s *Server) MakeHome() (err error) {
-	Log("making home of ", len(s.docs))
+
+	docs := make([]*Doc, 0)
+	for _, d := range s.Docs {
+		docs = append(docs, d)
+	}
+
+	Log("making home of ", len(docs))
 	n := Cfg.HomeArticles
-	if len(s.docs) < Cfg.HomeArticles {
-		n = len(s.docs)
+	if len(docs) < Cfg.HomeArticles {
+		n = len(docs)
 	}
 	r := s.newRootData()
 
-	r.Docs = s.docs[0:n]
+	r.Docs = docs[0:n]
 
-	f, err := os.Create(fmt.Sprintf("%s/%s", Cfg.PublicPath, "index.html"))
+	f, err := os.Create(path.Join(Cfg.PublicPath, "index.html"))
 	LErr(err)
 	LErr(s.template.home.ExecuteTemplate(f, "root", r))
 	return

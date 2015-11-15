@@ -2,9 +2,7 @@
 package bla
 
 import (
-	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -14,17 +12,13 @@ import (
 
 const Version = "0.1 alpha"
 
-var (
-	Cfg        *Config
-	configPath = flag.String("c", "./config.json", "")
-)
-
 func New() {
 
 	flag.Parse()
 	LoadConfig(*configPath)
 
-	server := &Server{docs: make([]*Doc, 0),
+	server := &Server{
+		Docs:        make(map[string]*Doc, 0),
 		Tags:        make(map[string][]*Doc, 0),
 		StaticFiles: make([]string, 0),
 		Version:     Version,
@@ -68,13 +62,6 @@ func (s *Server) LoadStaticFiles() {
 		})
 }
 
-func LoadConfig(path string) (err error) {
-
-	d, err := ioutil.ReadFile(path)
-	LFatal(err)
-	return json.Unmarshal(d, &Cfg)
-}
-
 func (s *Server) LoadTempalte() (err error) {
 
 	var funcMap = template.FuncMap{
@@ -96,7 +83,7 @@ func (s *Server) LoadTempalte() (err error) {
 }
 
 type Server struct {
-	docs        []*Doc
+	Docs        map[string]*Doc
 	Tags        map[string][]*Doc
 	StaticFiles []string
 	template    struct{ home, doc *template.Template }
