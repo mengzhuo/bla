@@ -88,13 +88,22 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 	//Log(doc)
 	doc.Parsed = parsed
 	doc.Related = make([]*Doc, 0)
+
+	s.DocLock.Lock()
+	defer s.DocLock.Unlock()
+
 	s.Docs[doc.RealPath] = doc
 	return
 }
 
-func (s *Server) makeRelated(d *Doc, t string) {
+func (s *Server) makeRelated() {
+
+	s.sortedDocs = s.sortedDocs[:0]
 
 	for _, d := range s.Docs {
+		// reset related docs
+		d.Related = d.Related[:0]
+		s.sortedDocs = append(s.sortedDocs, d)
 		for _, t := range d.Tags {
 			for _, rd := range s.Tags[t] {
 				if !docInDocs(rd, d.Related) && rd != d {
@@ -103,6 +112,9 @@ func (s *Server) makeRelated(d *Doc, t string) {
 			}
 		}
 	}
+
+	sort.Sort(docsByTime(s.sortedDocs))
+
 }
 
 func (s *Server) LoadAllDocs() (err error) {
@@ -111,16 +123,9 @@ func (s *Server) LoadAllDocs() (err error) {
 
 	filepath.Walk(Cfg.ContentPath, s.LoadDoc)
 
-	docs := make([]*Doc, 0)
-	for _, d := range s.Docs {
-		docs = append(docs, d)
-	}
-
-	sort.Sort(docsByTime(docs))
-
 	// make related doc
-
-	Log(fmt.Sprintf("Load %d docs in %s", len(docs), time.Since(start)))
+	s.makeRelated()
+	Log(fmt.Sprintf("Load %d docs in %s", len(s.sortedDocs), time.Since(start)))
 
 	return
 }
@@ -174,19 +179,14 @@ func (s *Server) SaveAllDocs() (err error) {
 
 func (s *Server) MakeHome() (err error) {
 
-	docs := make([]*Doc, 0)
-	for _, d := range s.Docs {
-		docs = append(docs, d)
-	}
-
-	Log("making home of ", len(docs))
+	Log("making home of ", len(s.sortedDocs))
 	n := Cfg.HomeArticles
-	if len(docs) < Cfg.HomeArticles {
-		n = len(docs)
+	if len(s.sortedDocs) < Cfg.HomeArticles {
+		n = len(s.sortedDocs)
 	}
 	r := s.newRootData()
 
-	r.Docs = docs[0:n]
+	r.Docs = s.sortedDocs[0:n]
 
 	f, err := os.Create(path.Join(Cfg.PublicPath, "index.html"))
 	LErr(err)

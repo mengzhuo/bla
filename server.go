@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 	"text/template"
 )
 
@@ -19,7 +20,10 @@ func New() {
 
 	server := &Server{
 		Docs:        make(map[string]*Doc, 0),
+		sortedDocs:  make([]*Doc, 0),
+		DocLock:     &sync.RWMutex{},
 		Tags:        make(map[string][]*Doc, 0),
+		TagLock:     &sync.RWMutex{},
 		StaticFiles: make([]string, 0),
 		Version:     Version,
 		StopWatch:   make(chan bool)}
@@ -84,9 +88,12 @@ func (s *Server) LoadTempalte() (err error) {
 
 type Server struct {
 	Docs        map[string]*Doc
+	sortedDocs  []*Doc
 	Tags        map[string][]*Doc
 	StaticFiles []string
 	template    struct{ home, doc *template.Template }
 	Version     string
 	StopWatch   chan bool
+	DocLock     *sync.RWMutex
+	TagLock     *sync.RWMutex
 }
