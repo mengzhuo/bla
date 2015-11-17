@@ -48,7 +48,12 @@ func New() {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	log.Print(r.BasicAuth())
+	if r.Method == "POST" {
+		log.Print(r.BasicAuth())
+	} else {
+		w.Header().Add("WWW-Authenticate", `Basic realm=""`)
+		w.WriteHeader(401)
+	}
 }
 
 func (s *Server) Reset() {
