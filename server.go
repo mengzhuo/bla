@@ -42,8 +42,13 @@ func New() {
 	log.Print(Cfg)
 	server.Watch()
 	server.ConfigWatch()
+	http.HandleFunc(path.Join(Cfg.BasePath, "/.login"), Login)
 	http.Handle("/", http.FileServer(http.Dir(Cfg.PublicPath)))
 	http.ListenAndServe(Cfg.Addr, nil)
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	log.Print(r.BasicAuth())
 }
 
 func (s *Server) Reset() {

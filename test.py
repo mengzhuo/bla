@@ -13,7 +13,7 @@ def make_random_nickname(l):
     for i,r in enumerate(rr):
         for x in range(_random.randint(3,8)):
             rr[i] += _random.choice(AEIOU if x % 2 == 1 else BCDFG + _random.choice(["", "h","r"]))
-        rr[i] = rr[i].title()
+        rr[i] = rr[i].lower()
 
     return " ".join(rr)
 
@@ -27,10 +27,10 @@ for i in xrange(int(sys.argv[1])):
         data += "<p>%s</p>"% make_random_nickname(1000)
         data += "<p>%s</p>"% make_random_nickname(1000)
         data += "<p>%s</p>"% make_random_nickname(1000)
-        data += "Tags:"
+        data += "<p>Tags:"
         for t in make_random_nickname(8).split(" "):
             data += "<span class='tag'>%s</span>&nbsp;" % t
-        data += "<span class='tag'>Tag</span>&nbsp;" 
+        data += "<span class='tag'>Tag</span>&nbsp;</p>" 
 
         f.write(data)
         import time
