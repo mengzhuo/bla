@@ -1,68 +1,64 @@
 package bla
 
 import (
-	"os"
+	"log"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"gopkg.in/fsnotify.v1"
 )
 
 func (s *Server) RebuildDoc(e fsnotify.Event) {
 
-	Log("rebuilding doc:", e)
-	if e.Op != fsnotify.Chmod {
-
-		p := path.Clean(e.Name)
-
-		Log(p)
-
-		if e.Op == fsnotify.Write {
-			f, err := os.Open(p)
-			LErr(err)
-			info, err := f.Stat()
-			LErr(err)
-			s.LoadDoc(p, info, nil)
-		}
+	if e.Op == fsnotify.Chmod || e.Op == fsnotify.Create {
+		return
 	}
 
+	if base := filepath.Base(e.Name); strings.HasPrefix(base, ".") || !(strings.HasSuffix(base, ".html") || strings.HasSuffix(base, ".tmpl")) {
+		return
+	}
+	log.Print("Events on ", e)
+
+	s.LoadAllDocs()
+	s.SaveAllDocs()
 	s.MakeHome()
 }
 
-func (s *Server) ReloadConfig() {
-
-	s.StopWatch <- true
-
-}
-
 func (s *Server) Watch() {
+
 	watcher, err := fsnotify.NewWatcher()
+
 	if err != nil {
-		LFatal(err)
+		log.Fatal(err)
 	}
 
-	LFatal(watcher.Add(Cfg.ContentPath))
-	LFatal(watcher.Add(Cfg.TemplatePath))
+	if err := watcher.Add(Cfg.ContentPath); err != nil {
+		log.Fatal(err)
+	}
+	if err := watcher.Add(Cfg.TemplatePath); err != nil {
+		log.Fatal(err)
+	}
 
 	go func(watcher *fsnotify.Watcher) {
 		defer watcher.Close()
 
 		contentPath := path.Clean(Cfg.ContentPath)
 		tmplPath := path.Clean(Cfg.TemplatePath)
-		Log("CP: ", contentPath)
 
 		for {
 			select {
 			case e := <-watcher.Events:
 
-				Log("EP: ", path.Clean(e.Name))
-
 				switch path.Dir(path.Clean(e.Name)) {
 				case tmplPath:
+					s.LoadTempalte()
+					fallthrough
 				case contentPath:
 					s.RebuildDoc(e)
 				}
 			case err := <-watcher.Errors:
-				LErr(err)
+				log.Print(err)
 			case <-s.StopWatch:
 				return
 			}
@@ -74,10 +70,36 @@ func (s *Server) ConfigWatch() {
 	// This will reload the whole server
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		LFatal(err)
+		log.Fatal(err)
 	}
-	defer watcher.Close()
 
-	LFatal(watcher.Add(*configPath))
+	watcher.Add(*configPath)
+	log.Printf("watch config:%s", *configPath)
 
+	go func(watcher *fsnotify.Watcher) {
+
+		defer watcher.Close()
+
+		for {
+			e := <-watcher.Events
+
+			if e.Op == fsnotify.Rename || e.Op == fsnotify.Remove {
+				continue
+			}
+
+			log.Print("config updated ", e)
+			s.StopWatch <- true
+
+			LoadConfig(*configPath)
+			watcher.Remove(*configPath)
+
+			s.LoadAllDocs()
+			s.SaveAllDocs()
+			s.MakeHome()
+
+			go s.Watch()
+			watcher.Add(*configPath)
+		}
+
+	}(watcher)
 }

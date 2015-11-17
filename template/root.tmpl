@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="generator" content="Bla {{ .Server.Version }}" />
         <title>{{ template "title" . }}</title>
         {{range $path := .Server.StaticFiles}}
@@ -19,40 +19,48 @@
     </head>
     <body>
     <div id="topbar">
-        <h1><a href="{{ .Cfg.BaseURL }}">{{ .Cfg.Title }}</a></h1>
+        <div class="container">
+            <h1><a href="{{ .Cfg.BaseURL }}">{{ .Cfg.Title }}</a></h1>
+        </div>
     </div>
     
-    <div id="container">
+    <div class="container">
+        {{ template "sidebar" . }}
         {{ template "content" . }}
-
-        <div id="footer">
-            {{ template "footer" . }}
-        </div>
+    </div>
+    <div id="footer">
+        {{ template "footer" . }}
     </div>
     </body>
 </html>
 {{end}}
 
 {{define "doc"}}
-<article>
+<div class="article">
     {{ .Parsed.First.Html }}
     {{ $rl := len .Related }}
     {{if gt $rl 0}}
     <p>Related article:
         <ul>
-        {{range .Related }}
-            <li><a href="{{ .Path }}" class="related">{{ .Title }}</a></li>
+        {{range $key, $doc := .Related }}
+            <li><a href="{{ $doc.Path }}" class="related">{{ $doc.Title }}</a></li>
         {{end}}
         </ul>
     </p>
     {{ end }} 
-</article>
+</div>
 {{end}}
 
 {{define "shortdoc"}}
+<div class="article">
 {{ .Parsed.First.Html }}
+</div>
 {{end}}
 
 {{define "footer"}}
 <p>{{.Cfg.Footer}} | powered by <a href="https://github.com/mengzhuo/bla">Bla</a></p>
 {{ end }}
+
+
+{{define "sidebar" }}
+{{end}}

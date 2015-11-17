@@ -1,8 +1,8 @@
 package bla
 
 import (
-	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -34,11 +34,11 @@ func (d *Doc) String() string {
 
 func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 
-	if !info.Mode().IsRegular() {
+	if info == nil || !info.Mode().IsRegular() {
 		return
 	}
 
-	if strings.HasPrefix(filepath.Base(path), ".") {
+	if !strings.HasSuffix(filepath.Base(path), ".html") {
 		return
 	}
 
@@ -46,15 +46,17 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 
 	f, err := os.Open(path)
 	if err != nil {
-		LErr(err)
+		log.Print(err)
 		return
 	}
 	defer f.Close()
 
-	doc := &Doc{RealPath: path}
+	doc := &Doc{RealPath: path,
+		Related: make([]*Doc, 0)}
+
 	parsed, err := goquery.NewDocumentFromReader(f)
 	if err != nil {
-		LErr(err)
+		log.Printf("Parse failed:%v", err)
 		return
 	}
 
@@ -66,7 +68,7 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 	if t := parsed.Find(".date").First().Text(); t != "" {
 		doc.Time, err = time.Parse("2006-01-02", t)
 		if err != nil {
-			LErr(err)
+			log.Print(err)
 			return
 		}
 	} else {
@@ -87,7 +89,6 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 
 	//Log(doc)
 	doc.Parsed = parsed
-	doc.Related = make([]*Doc, 0)
 
 	s.DocLock.Lock()
 	defer s.DocLock.Unlock()
@@ -120,12 +121,13 @@ func (s *Server) makeRelated() {
 func (s *Server) LoadAllDocs() (err error) {
 
 	start := time.Now()
+	s.Tags = make(map[string][]*Doc)
 
 	filepath.Walk(Cfg.ContentPath, s.LoadDoc)
 
 	// make related doc
 	s.makeRelated()
-	Log(fmt.Sprintf("Load %d docs in %s", len(s.sortedDocs), time.Since(start)))
+	log.Printf("Load %d docs in %s", len(s.sortedDocs), time.Since(start))
 
 	return
 }
@@ -150,28 +152,33 @@ func docInDocs(doc *Doc, docs []*Doc) bool {
 	return false
 }
 
-func (s *Server) MakeDocAppend(doc *Doc) (app string) {
-
-	buf := bytes.NewBuffer([]byte{})
-
-	for _, d := range doc.Related {
-
-		fmt.Fprintf(buf, `<a href="%s" class="related">%s</a> `, d.Path, d.Title)
-		doc.Related = append(doc.Related, d)
-	}
-	return buf.String()
-}
-
 func (s *Server) SaveAllDocs() (err error) {
+
+	r := s.newRootData()
+
+	err = os.MkdirAll(path.Join(Cfg.PublicPath, Cfg.BasePath), 0755)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, d := range s.Docs {
 
-		r := s.newRootData()
 		r.Docs = []*Doc{d}
+		docPubPath := path.Join(Cfg.PublicPath, d.Path)
+		if docPubPath == path.Dir(docPubPath) {
+			continue
+		}
 
-		f, err := os.Create(path.Join(Cfg.PublicPath, santiSpace(d.Title)))
-		LErr(err)
-		LErr(s.template.doc.ExecuteTemplate(f, "root", r))
+		f, err := os.Create(docPubPath)
+		if err != nil {
+			log.Print(err)
+		}
+
+		if err = s.template.doc.ExecuteTemplate(f, "root", r); err != nil {
+			log.Print(err)
+		}
 		f.Close()
+		os.Chtimes(docPubPath, d.Time, d.Time)
 	}
 
 	return
@@ -179,7 +186,7 @@ func (s *Server) SaveAllDocs() (err error) {
 
 func (s *Server) MakeHome() (err error) {
 
-	Log("making home of ", len(s.sortedDocs))
+	log.Print("making home of ", len(s.sortedDocs))
 	n := Cfg.HomeArticles
 	if len(s.sortedDocs) < Cfg.HomeArticles {
 		n = len(s.sortedDocs)
@@ -189,8 +196,33 @@ func (s *Server) MakeHome() (err error) {
 	r.Docs = s.sortedDocs[0:n]
 
 	f, err := os.Create(path.Join(Cfg.PublicPath, "index.html"))
-	LErr(err)
-	LErr(s.template.home.ExecuteTemplate(f, "root", r))
+	if err != nil {
+		log.Print(err)
+	}
+	if err = s.template.home.ExecuteTemplate(f, "root", r); err != nil {
+		log.Print(err)
+	}
+
+	j := 1
+	for i := 0; i < len(s.Docs); i += Cfg.HomeArticles {
+		f, err := os.Create(path.Join(Cfg.PublicPath, fmt.Sprintf("index-%d", j)))
+		if err != nil {
+			log.Print(err)
+		}
+
+		n := i + Cfg.HomeArticles
+		if i+Cfg.HomeArticles > len(s.sortedDocs) {
+			n = len(s.sortedDocs) - 1
+		}
+
+		r.Docs = s.sortedDocs[i:n]
+
+		if err = s.template.index.ExecuteTemplate(f, "root", r); err != nil {
+			log.Print(err)
+		}
+		j++
+	}
+
 	return
 }
 

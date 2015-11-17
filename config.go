@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"io/ioutil"
+	"log"
 	"path/filepath"
 )
 
@@ -16,7 +17,6 @@ var (
 type Config struct {
 	Addr     string `json:"address"`
 	BaseURL  string `json:"base_url"`
-	BaseRoot string `json:"base_root"`
 	BasePath string `json:"base_path"`
 
 	username string `json:"username"`
@@ -27,20 +27,26 @@ type Config struct {
 	Footer       string `json:"footer"`
 
 	ContentPath  string `json:"content_path"`
+	UploadPath   string `json:"upload_path"`
 	TemplatePath string `json:"template_path"`
 
 	PublicPath string `json:"public_path"` // all parsed html/content etc...
+	Favicon    string `json:"favicon"`
 }
 
 func LoadConfig(path string) (err error) {
 
 	d, err := ioutil.ReadFile(path)
-	LFatal(err)
+	if err != nil {
+		log.Fatal(err)
+	}
+	Cfg = nil
 	err = json.Unmarshal(d, &Cfg)
 
 	// Clean
 	Cfg.ContentPath = filepath.Clean(Cfg.ContentPath)
 	Cfg.TemplatePath = filepath.Clean(Cfg.TemplatePath)
 	Cfg.PublicPath = filepath.Clean(Cfg.PublicPath)
+	Cfg.UploadPath = filepath.Clean(Cfg.UploadPath)
 	return
 }

@@ -3,6 +3,7 @@ package bla
 
 import (
 	"flag"
+	"log"
 	"net/http"
 	"os"
 	"path"
@@ -28,29 +29,50 @@ func New() {
 		Version:     Version,
 		StopWatch:   make(chan bool)}
 
-	LFatal(server.LoadTempalte())
+	server.Reset()
+	if err := server.LoadTempalte(); err != nil {
+		log.Fatal(err)
+	}
 	server.LoadStaticFiles()
 	server.LoadAllDocs()
-	LFatal(server.SaveAllDocs())
+	if err := server.SaveAllDocs(); err != nil {
+		log.Fatal(err)
+	}
 	server.MakeHome()
-	Log(Cfg)
+	log.Print(Cfg)
 	server.Watch()
+	server.ConfigWatch()
 	http.Handle("/", http.FileServer(http.Dir(Cfg.PublicPath)))
 	http.ListenAndServe(Cfg.Addr, nil)
 }
 
+func (s *Server) Reset() {
+
+	if err := os.RemoveAll(Cfg.PublicPath); err != nil {
+		log.Print(err)
+	}
+
+	fav, _ := filepath.Abs(Cfg.Favicon)
+	dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, "favicon.ico"))
+
+	if err := os.Symlink(fav, dest); err != nil {
+		log.Print(err)
+	}
+}
+
 func (s *Server) LoadStaticFiles() {
 
-	Log("Rebuild from: ", Cfg.TemplatePath)
-	LErr(os.RemoveAll(Cfg.PublicPath))
-	LErr(os.MkdirAll(Cfg.PublicPath, 0755))
+	log.Print("Rebuild from: ", Cfg.TemplatePath)
+	os.MkdirAll(Cfg.PublicPath, 0755)
 	orig, err := filepath.Abs(filepath.Join(Cfg.TemplatePath, "asset"))
 	dest, err := filepath.Abs(filepath.Join(Cfg.PublicPath, "asset"))
-	LErr(err)
+	if err != nil {
+		log.Print(err)
+	}
 
-	Log("Rebuild link:", orig, " -> ", dest)
-	LErr(os.Symlink(orig, dest))
-	Log("Loading Asset files")
+	log.Print("Rebuild link:", orig, " -> ", dest)
+	log.Print(os.Symlink(orig, dest))
+	log.Print("Loading Asset files")
 	filepath.Walk(orig,
 		func(path string, info os.FileInfo, e error) (err error) {
 
@@ -60,7 +82,7 @@ func (s *Server) LoadStaticFiles() {
 			if !(filepath.Ext(path) == ".css" || filepath.Ext(path) == ".js") {
 				return
 			}
-			Log("|- ", path)
+			log.Print("|- ", path)
 			s.StaticFiles = append(s.StaticFiles, path)
 			return
 		})
@@ -76,13 +98,14 @@ func (s *Server) LoadTempalte() (err error) {
 	parsed := func(fname string) (t *template.Template) {
 		t, err = template.New("").Funcs(funcMap).ParseFiles(root, filepath.Join(Cfg.TemplatePath, fname))
 		if err != nil {
-			LFatal(err)
+			log.Fatal(err)
 		}
 		return t
 	}
 
 	s.template.home = parsed("home.tmpl")
 	s.template.doc = parsed("doc.tmpl")
+	s.template.index = parsed("index.tmpl")
 	return
 }
 
@@ -91,7 +114,7 @@ type Server struct {
 	sortedDocs  []*Doc
 	Tags        map[string][]*Doc
 	StaticFiles []string
-	template    struct{ home, doc *template.Template }
+	template    struct{ home, doc, index *template.Template }
 	Version     string
 	StopWatch   chan bool
 	DocLock     *sync.RWMutex
