@@ -195,7 +195,7 @@ func (s *Server) MakeHome() (err error) {
 
 	r.Docs = s.sortedDocs[0:n]
 
-	f, err := os.Create(path.Join(Cfg.PublicPath, "index.html"))
+	f, err := os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, "index.html"))
 	if err != nil {
 		log.Print(err)
 	}
@@ -205,7 +205,7 @@ func (s *Server) MakeHome() (err error) {
 
 	j := 1
 	for i := 0; i < len(s.Docs); i += Cfg.HomeArticles {
-		f, err := os.Create(path.Join(Cfg.PublicPath, fmt.Sprintf("index-%d", j)))
+		f, err := os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, fmt.Sprintf("index-%d", j)))
 		if err != nil {
 			log.Print(err)
 		}

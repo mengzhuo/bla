@@ -51,19 +51,34 @@ func (s *Server) Reset() {
 	if err := os.RemoveAll(Cfg.PublicPath); err != nil {
 		log.Print(err)
 	}
+	os.MkdirAll(Cfg.PublicPath, 0755)
 
-	fav, _ := filepath.Abs(Cfg.Favicon)
-	dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, "favicon.ico"))
+	if Cfg.Favicon != "" {
+		fav, _ := filepath.Abs(Cfg.Favicon)
+		dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, "favicon.ico"))
 
-	if err := os.Symlink(fav, dest); err != nil {
+		if err := os.Symlink(fav, dest); err != nil {
+			log.Print(err)
+		} else {
+			log.Print("Rebuild link:", fav, " -> ", dest)
+		}
+	}
+
+	uploads, _ := filepath.Abs(Cfg.UploadPath)
+	dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, Cfg.BasePath, "uploads"))
+
+	os.MkdirAll(filepath.Join(Cfg.PublicPath, Cfg.BasePath), 0755)
+
+	if err := os.Symlink(uploads, dest); err != nil {
 		log.Print(err)
+	} else {
+		log.Print("Rebuild link:", uploads, " -> ", dest)
 	}
 }
 
 func (s *Server) LoadStaticFiles() {
 
 	log.Print("Rebuild from: ", Cfg.TemplatePath)
-	os.MkdirAll(Cfg.PublicPath, 0755)
 	orig, err := filepath.Abs(filepath.Join(Cfg.TemplatePath, "asset"))
 	dest, err := filepath.Abs(filepath.Join(Cfg.PublicPath, "asset"))
 	if err != nil {
@@ -71,7 +86,9 @@ func (s *Server) LoadStaticFiles() {
 	}
 
 	log.Print("Rebuild link:", orig, " -> ", dest)
-	log.Print(os.Symlink(orig, dest))
+	if err := os.Symlink(orig, dest); err != nil {
+		log.Print(err)
+	}
 	log.Print("Loading Asset files")
 	filepath.Walk(orig,
 		func(path string, info os.FileInfo, e error) (err error) {
