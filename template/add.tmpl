@@ -1,4 +1,4 @@
-{{ define "title" }}Add Post{{ .Cfg.Title }}{{ end }}
+{{ define "title" }}Add Post - {{ .Cfg.Title }}{{ end }}
 {{ define "content" }}
     <form method="POST" action="{{.Cfg.BasePath}}.add">
     <div class="article editor">
