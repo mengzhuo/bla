@@ -10,22 +10,11 @@ a:hover {text-decoration: underline; }
 .container:after{content:"";display:block;clear:both;}
 .article {text-align:left;}
 p {word-wrap:break-word;}
-#sidebar {
-            float: right;
-            padding-left: 20px;
-            width: 40%;
-            max-width: 250px;
-            background: #F3F3F3;
-            margin: 20px 0 20px 20px;
-            text-align:left;
-        }
-        #sidebar ul {
-            padding: 0;
-        }
-        #sidebar li {
-            list-style-type: none;
-        }
+#sidebar { float: right; padding-left: 20px; width: 40%; max-width: 250px; background: #F3F3F3; margin: 20px 0 20px 20px; text-align:left; }
+#sidebar ul { padding: 0; }
+#sidebar li { list-style-type: none; }
 #footer {margin:3em 0 0;text-align:center;color:#666;}
 #footer p {max-width:100%;}
 .title {font-size:1.5em;margin:1em 0;}
+.editor {min-height:300px;}
 

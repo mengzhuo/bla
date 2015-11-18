@@ -2,6 +2,7 @@
 package bla
 
 import (
+	"bytes"
 	"flag"
 	"log"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"sync"
 	"text/template"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 const Version = "0.1 alpha"
@@ -57,13 +60,40 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		rd := s.newRootData()
-
 		if err := s.template.add.ExecuteTemplate(w, "root", rd); err != nil {
 			log.Print(err)
 			w.Write([]byte(err.Error()))
 			w.WriteHeader(500)
 		}
 	case "POST":
+		r.ParseForm()
+		content := r.FormValue("mce_0")
+		parsed, err := goquery.NewDocumentFromReader(bytes.NewBuffer([]byte(content)))
+		if err != nil {
+			log.Printf("Parse failed:%v", err)
+			w.WriteHeader(500)
+			return
+		}
+		header := parsed.Find("h1").First().Text()
+		if header == "" {
+			log.Print("Header not existed", header)
+			w.WriteHeader(500)
+			return
+
+		}
+
+		f, err := os.Create(filepath.Join(Cfg.ContentPath, header+".html"))
+		if err != nil {
+			log.Print(err)
+			w.WriteHeader(500)
+			return
+		}
+		defer f.Close()
+
+		f.WriteString(content)
+		w.Header().Set("Location", path.Join(Cfg.BaseURL, Cfg.BasePath))
+		w.WriteHeader(301)
+
 	default:
 		w.WriteHeader(403)
 

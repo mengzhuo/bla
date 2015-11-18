@@ -1,10 +1,12 @@
 {{ define "title" }}Add Post{{ .Cfg.Title }}{{ end }}
 {{ define "content" }}
-    <div class="article">
+    <form method="POST" action="{{.Cfg.BasePath}}.add">
+    <div class="article editor">
         <h1>Title</h1>
-        <p class="date">{{ now }}</p>
-        
+        <p class="date">{{ now.Format "2006-01-02" }}</p>
         <p>Here is some content</p>
     </div>
+    <button type="submit">Submit</button>
+    </form>
     {{ template "editor" . | js }}
 {{end}}

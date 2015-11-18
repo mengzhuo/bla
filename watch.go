@@ -11,7 +11,7 @@ import (
 
 func (s *Server) RebuildDoc(e fsnotify.Event) {
 
-	if e.Op == fsnotify.Chmod || e.Op == fsnotify.Create {
+	if e.Op == fsnotify.Chmod {
 		return
 	}
 
