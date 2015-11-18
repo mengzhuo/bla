@@ -1,0 +1,10 @@
+{{ define "title" }}Add Post{{ .Cfg.Title }}{{ end }}
+{{ define "content" }}
+    <div class="article">
+        <h1>Title</h1>
+        <p class="date">{{ now }}</p>
+        
+        <p>Here is some content</p>
+    </div>
+    {{ template "editor" . | js }}
+{{end}}

@@ -1,6 +1,6 @@
 {
 "address":":7080",
-"base_url":"https://mengzhuo.org/blog/",
+"base_url":"http://10.5.4.152:7080",
 "base_path":"/blog/",
 "username":"m",
 "password":"p",
@@ -10,6 +10,6 @@
 "upload_path":"./uploads",
 "public_path":"./public",
 "favicon": "favicon.ico",
-"title":"蒙卓的博客",
+"title":"OK",
 "footer":"Code is poetry"
 }

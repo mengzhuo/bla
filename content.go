@@ -99,6 +99,7 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 
 func (s *Server) makeRelated() {
 
+	// clean all docs
 	s.sortedDocs = s.sortedDocs[:0]
 
 	for _, d := range s.Docs {

@@ -19,8 +19,8 @@ type Config struct {
 	BaseURL  string `json:"base_url"`
 	BasePath string `json:"base_path"`
 
-	username string `json:"username"`
-	password string `json:"password"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 
 	HomeArticles int    `json:"home_articles"`
 	Title        string `json:"title"`
@@ -42,6 +42,9 @@ func LoadConfig(path string) (err error) {
 	}
 	Cfg = nil
 	err = json.Unmarshal(d, &Cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Clean
 	Cfg.ContentPath = filepath.Clean(Cfg.ContentPath)

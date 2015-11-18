@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sync"
 	"text/template"
+	"time"
 )
 
 const Version = "0.1 alpha"
@@ -42,18 +43,38 @@ func New() {
 	log.Print(Cfg)
 	server.Watch()
 	server.ConfigWatch()
-	http.HandleFunc(path.Join(Cfg.BasePath, "/.login"), Login)
+
+	http.HandleFunc(path.Join(Cfg.BasePath, "/.add"), server.Add)
+	http.HandleFunc(path.Join(Cfg.BasePath, "/.edit"), server.Edit)
+	http.HandleFunc(path.Join(Cfg.BasePath, "/.remove"), server.Remove)
+
 	http.Handle("/", http.FileServer(http.Dir(Cfg.PublicPath)))
 	http.ListenAndServe(Cfg.Addr, nil)
 }
 
-func Login(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		log.Print(r.BasicAuth())
-	} else {
-		w.Header().Add("WWW-Authenticate", `Basic realm=""`)
-		w.WriteHeader(401)
+func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case "GET":
+		rd := s.newRootData()
+
+		if err := s.template.add.ExecuteTemplate(w, "root", rd); err != nil {
+			log.Print(err)
+			w.Write([]byte(err.Error()))
+			w.WriteHeader(500)
+		}
+	case "POST":
+	default:
+		w.WriteHeader(403)
+
 	}
+}
+
+func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
+
+}
+func (s *Server) Remove(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func (s *Server) Reset() {
@@ -120,6 +141,7 @@ func (s *Server) LoadTempalte() (err error) {
 	var funcMap = template.FuncMap{
 		"base": path.Base,
 		"ext":  filepath.Ext,
+		"now":  time.Now,
 	}
 	root := filepath.Join(Cfg.TemplatePath, "root.tmpl")
 	parsed := func(fname string) (t *template.Template) {
@@ -133,6 +155,8 @@ func (s *Server) LoadTempalte() (err error) {
 	s.template.home = parsed("home.tmpl")
 	s.template.doc = parsed("doc.tmpl")
 	s.template.index = parsed("index.tmpl")
+
+	s.template.add = parsed("add.tmpl")
 	return
 }
 
@@ -141,7 +165,7 @@ type Server struct {
 	sortedDocs  []*Doc
 	Tags        map[string][]*Doc
 	StaticFiles []string
-	template    struct{ home, doc, index *template.Template }
+	template    struct{ home, doc, index, add *template.Template }
 	Version     string
 	StopWatch   chan bool
 	DocLock     *sync.RWMutex
