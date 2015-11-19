@@ -9,10 +9,10 @@
         {{range $path := .Server.StaticFiles}}
         {{with $pathExt := $path | ext }}
                 {{ if eq $pathExt ".css"}}
-                <link rel="stylesheet" href="/asset/{{$path | base}}">
+                <link rel="stylesheet" href="{{ $.Cfg.BasePath }}/asset/{{$path | base}}">
                 {{end}}
                 {{ if eq $pathExt ".js"}}
-                <script src="/asset/{{$path | base}}"></script>
+                <script src="{{ $.Cfg.BasePath }}/asset/{{$path | base}}"></script>
                 {{end}}
             {{end}}
         {{end}} 
@@ -20,7 +20,7 @@
     <body>
     <div id="topbar">
         <div class="container">
-            <h1><a href="{{ .Cfg.BaseURL }}">{{ .Cfg.Title }}</a></h1>
+            <h1><a href="{{ .Cfg.BasePath }}">{{ .Cfg.Title }}</a></h1>
         </div>
     </div>
     
@@ -72,6 +72,7 @@ window.onload = function(){
 tinymce.init({
     selector: ".article",
     inline: true,
+    browser_spellcheck : true,
     plugins: [
         "advlist autolink lists link image charmap print preview anchor",
         "searchreplace visualblocks code fullscreen",

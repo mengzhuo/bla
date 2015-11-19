@@ -17,4 +17,7 @@ p {word-wrap:break-word;}
 #footer p {max-width:100%;}
 .title {font-size:1.5em;margin:1em 0;}
 .editor {min-height:300px;}
-
+.date {color:#888;font-size:0.6em;}
+.submit {padding:0.3em 0.5em;}
+pre, code {font-family:Consolas, 'Liberation Mono', Menlo, Courier, monospace;font-size:0.8em;}
+pre {background: #EFEFEF; padding: 10px; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; }

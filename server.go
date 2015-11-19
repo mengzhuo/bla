@@ -91,7 +91,8 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 		defer f.Close()
 
 		f.WriteString(content)
-		w.Header().Set("Location", path.Join(Cfg.BaseURL, Cfg.BasePath))
+		w.Header().Set("Location", Cfg.BasePath)
+		time.Sleep(time.Millisecond * 50)
 		w.WriteHeader(301)
 
 	default:
@@ -141,7 +142,7 @@ func (s *Server) LoadStaticFiles() {
 
 	log.Print("Rebuild from: ", Cfg.TemplatePath)
 	orig, err := filepath.Abs(filepath.Join(Cfg.TemplatePath, "asset"))
-	dest, err := filepath.Abs(filepath.Join(Cfg.PublicPath, "asset"))
+	dest, err := filepath.Abs(filepath.Join(Cfg.PublicPath, Cfg.BasePath, "asset"))
 	if err != nil {
 		log.Print(err)
 	}

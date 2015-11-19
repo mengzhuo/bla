@@ -123,9 +123,9 @@ func (s *Server) LoadAllDocs() (err error) {
 
 	start := time.Now()
 	s.Tags = make(map[string][]*Doc)
+	s.Docs = make(map[string]*Doc)
 
 	filepath.Walk(Cfg.ContentPath, s.LoadDoc)
-
 	// make related doc
 	s.makeRelated()
 	log.Printf("Load %d docs in %s", len(s.sortedDocs), time.Since(start))
