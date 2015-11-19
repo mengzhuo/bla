@@ -21,3 +21,4 @@ p {word-wrap:break-word;}
 .submit {padding:0.3em 0.5em;}
 pre, code {font-family:Consolas, 'Liberation Mono', Menlo, Courier, monospace;font-size:0.8em;}
 pre {background: #EFEFEF; padding: 10px; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; }
+img {max-width:95% !important; height:auto;}

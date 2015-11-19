@@ -1,16 +1,16 @@
 {
 "address":":7080",
-"base_url":"http://10.5.4.152:7080",
+"base_url":"https://mengzhuo.org/",
 "base_path":"/blog/",
 "username":"m",
 "password":"p",
-"home_articles":10,
+"home_articles":4,
 "content_path":"./content",
 "template_path":"./template",
 "upload_path":"./uploads",
 "public_path":"./public",
 "favicon": "favicon.ico",
-"title":"OK",
+"title":"笔记本",
 "footer":"Code is poetry",
 "doc_url_format":"%s.html"
 }

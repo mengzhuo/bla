@@ -25,7 +25,8 @@ type Doc struct {
 }
 
 func santiSpace(s string) string {
-	return strings.Replace(s, " ", "-", -1)
+	ss := strings.Replace(s, " ", "-", -1)
+	return strings.Replace(ss, "/", "-", -1)
 }
 
 func (d *Doc) String() string {
