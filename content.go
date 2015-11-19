@@ -63,7 +63,7 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 	header := parsed.Find("h1").First()
 	doc.Title = header.Text()
 	doc.headerNode = header
-	doc.Path = Cfg.BasePath + santiSpace(doc.Title)
+	doc.Path = Cfg.BasePath + fmt.Sprintf(Cfg.DocURLFormat, santiSpace(doc.Title))
 
 	if t := parsed.Find(".date").First().Text(); t != "" {
 		doc.Time, err = time.Parse("2006-01-02", t)

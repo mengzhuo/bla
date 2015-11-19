@@ -88,11 +88,11 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 			return
 		}
-		defer f.Close()
 
 		f.WriteString(content)
+		f.Close()
+
 		w.Header().Set("Location", Cfg.BasePath)
-		time.Sleep(time.Millisecond * 50)
 		w.WriteHeader(301)
 
 	default:

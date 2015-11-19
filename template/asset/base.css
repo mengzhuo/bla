@@ -15,8 +15,8 @@ p {word-wrap:break-word;}
 #sidebar li { list-style-type: none; }
 #footer {margin:3em 0 0;text-align:center;color:#666;}
 #footer p {max-width:100%;}
-.title {font-size:1.5em;margin:1em 0;}
-.editor {min-height:300px;}
+.title {font-size:1.5em;margin:1em 0 0em;}
+.editor {min-height:300px;padding-top:5px;}
 .date {color:#888;font-size:0.6em;}
 .submit {padding:0.3em 0.5em;}
 pre, code {font-family:Consolas, 'Liberation Mono', Menlo, Courier, monospace;font-size:0.8em;}

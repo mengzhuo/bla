@@ -11,5 +11,6 @@
 "public_path":"./public",
 "favicon": "favicon.ico",
 "title":"OK",
-"footer":"Code is poetry"
+"footer":"Code is poetry",
+"doc_url_format":"%s.html"
 }

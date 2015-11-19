@@ -25,6 +25,7 @@ type Config struct {
 	HomeArticles int    `json:"home_articles"`
 	Title        string `json:"title"`
 	Footer       string `json:"footer"`
+	DocURLFormat string `json:"doc_url_format"`
 
 	ContentPath  string `json:"content_path"`
 	UploadPath   string `json:"upload_path"`
@@ -51,5 +52,10 @@ func LoadConfig(path string) (err error) {
 	Cfg.TemplatePath = filepath.Clean(Cfg.TemplatePath)
 	Cfg.PublicPath = filepath.Clean(Cfg.PublicPath)
 	Cfg.UploadPath = filepath.Clean(Cfg.UploadPath)
+
+	if Cfg.DocURLFormat == "" {
+		Cfg.DocURLFormat = "%s"
+	}
+
 	return
 }
