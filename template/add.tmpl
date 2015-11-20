@@ -2,7 +2,12 @@
 {{ define "content" }}
     <form method="POST" action="{{.Cfg.BasePath}}.add" >
     <div class="article editor">
-        <h1>Title</h1><span class="date">{{ now.Format "2006-01-02" }}</span> <p>Here is some content</p>
+        {{ $rl := len .Docs }}
+        {{if gt $rl 0}}
+            {{with index .Docs 0 }}{{ .Parsed.First.Html }}{{end}}
+        {{ else }}
+            <h1>Title</h1><span class="date">{{ now.Format "2006-01-02" }}</span> <p>Here is some content</p>
+        {{end}}
     </div>
     <button class="submit" type="submit">Submit</button>
     </form>

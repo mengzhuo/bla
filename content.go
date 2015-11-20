@@ -13,6 +13,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+const IndexNumber = 20
+
 type Doc struct {
 	RealPath   string // as id
 	Path       string
@@ -141,7 +143,7 @@ type rootData struct {
 }
 
 func (s *Server) newRootData() *rootData {
-	return &rootData{Server: s, Cfg: Cfg}
+	return &rootData{Server: s, Cfg: Cfg, Docs: make([]*Doc, 0)}
 }
 
 func docInDocs(doc *Doc, docs []*Doc) bool {
@@ -206,14 +208,14 @@ func (s *Server) MakeHome() (err error) {
 	}
 
 	j := 1
-	for i := 0; i < len(s.Docs); i += Cfg.HomeArticles {
+	for i := 0; i < len(s.Docs); i += IndexNumber {
 		f, err := os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, fmt.Sprintf("index-%d", j)))
 		if err != nil {
 			log.Print(err)
 		}
 
-		n := i + Cfg.HomeArticles
-		if i+Cfg.HomeArticles > len(s.sortedDocs) {
+		n := i + IndexNumber
+		if i+IndexNumber > len(s.sortedDocs) {
 			n = len(s.sortedDocs) - 1
 		}
 

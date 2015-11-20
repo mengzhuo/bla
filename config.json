@@ -12,5 +12,6 @@
 "favicon": "favicon.ico",
 "title":"笔记本",
 "footer":"Code is poetry",
-"doc_url_format":"%s.html"
-}
+"doc_url_format":"%s.html",
+"certfile":"",
+"keyfile":"" }

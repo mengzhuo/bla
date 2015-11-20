@@ -4,6 +4,7 @@ package bla
 import (
 	"bytes"
 	"flag"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	auth "github.com/abbot/go-http-auth"
 )
 
 const Version = "0.1 alpha"
@@ -47,15 +49,36 @@ func New() {
 	server.Watch()
 	server.ConfigWatch()
 
-	http.HandleFunc(path.Join(Cfg.BasePath, "/.add"), server.Add)
-	http.HandleFunc(path.Join(Cfg.BasePath, "/.edit"), server.Edit)
-	http.HandleFunc(path.Join(Cfg.BasePath, "/.remove"), server.Remove)
+	secret := func(username, realm string) string {
+
+		log.Print(username, realm)
+
+		if username == Cfg.Username {
+			return "b98e16cbc3d01734b264adba7baa3bf9"
+		}
+		return ""
+	}
+	authenticator := auth.NewDigestAuthenticator(Cfg.BaseURL, secret)
+
+	admin := map[string]auth.AuthenticatedHandlerFunc{
+		".add":  server.Add,
+		".edit": server.Edit,
+	}
+	for k, v := range admin {
+		h := authenticator.Wrap(v)
+		http.HandleFunc(path.Join(Cfg.BasePath, k), h)
+	}
 
 	http.Handle("/", http.FileServer(http.Dir(Cfg.PublicPath)))
-	http.ListenAndServe(Cfg.Addr, nil)
+
+	if Cfg.TLSKeyFile != "" && Cfg.TLSCertFile != "" {
+		log.Fatal(http.ListenAndServeTLS(Cfg.Addr, Cfg.TLSCertFile, Cfg.TLSKeyFile, nil))
+	} else {
+		log.Fatal(http.ListenAndServe(Cfg.Addr, nil))
+	}
 }
 
-func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Add(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 
 	switch r.Method {
 	case "GET":
@@ -101,11 +124,49 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
+func (s *Server) Edit(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
+	switch r.Method {
+	case "GET":
+		doc := r.URL.Query().Get("doc")
+		if doc == "" {
 
-}
-func (s *Server) Remove(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("no doc query"))
+			w.WriteHeader(403)
+			return
+		}
 
+		fp := filepath.Join(Cfg.ContentPath, doc)
+		if _, err := os.Stat(fp); os.IsNotExist(err) {
+			w.Write([]byte("no such doc"))
+			w.WriteHeader(404)
+			return
+		}
+
+		f, err := os.Open(fp)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			w.WriteHeader(500)
+			return
+		}
+		defer f.Close()
+
+		rd := s.newRootData()
+		parsed, _ := goquery.NewDocumentFromReader(f)
+
+		rd.Docs = append(rd.Docs, &Doc{Parsed: parsed})
+		if err := s.template.add.ExecuteTemplate(w, "root", rd); err != nil {
+			log.Print(err)
+			w.Write([]byte(err.Error()))
+			w.WriteHeader(500)
+			f.Close()
+			return
+		}
+
+		bak, err := os.Create(fp + ".bak")
+		io.Copy(bak, f)
+		bak.Close()
+		f.Close()
+	}
 }
 
 func (s *Server) Reset() {

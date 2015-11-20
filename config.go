@@ -33,6 +33,9 @@ type Config struct {
 
 	PublicPath string `json:"public_path"` // all parsed html/content etc...
 	Favicon    string `json:"favicon"`
+
+	TLSCertFile string `json:"certfile"`
+	TLSKeyFile  string `json:"keyfile"`
 }
 
 func LoadConfig(path string) (err error) {
