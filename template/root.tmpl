@@ -73,8 +73,9 @@ tinymce.init({
     selector: ".article",
     inline: true,
     browser_spellcheck : true,
+    style_formats: [{title:"Tag", inline:"span", classes:"tag"}],
     plugins: [
-        "advlist autolink lists link image charmap print preview anchor",
+        "advlist autolink lists link image charmap anchor",
         "searchreplace visualblocks code",
         "insertdatetime media table contextmenu paste"
     ],
