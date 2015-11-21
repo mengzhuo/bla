@@ -10,6 +10,12 @@
         {{end}}
     </div>
     <button class="submit" type="submit">Submit</button>
+    <a class="logout" href="javascript:logout()" >Logout</a>
+    <script>function logout(){
+        var out = window.location.href.replace(/:\/\//, '://log:out@');
+        window.location = out;
+
+    }</script>
     </form>
     {{ template "editor" . | js }}
 {{end}}

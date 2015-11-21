@@ -42,8 +42,10 @@
     {{if gt $rl 0}}
     <p>Related article:
         <ul>
-        {{range $key, $doc := .Related }}
-            <li><a href="{{ $doc.Path }}" class="related">{{ $doc.Title }}</a></li>
+        {{range $index, $doc := .Related }}
+            {{ if lt $index 10 }}
+            <li><a id="{{ $index }}" href="{{ $doc.Path }}" class="related">{{ $doc.Title }}</a></li>
+            {{ end }}
         {{end}}
         </ul>
     </p>

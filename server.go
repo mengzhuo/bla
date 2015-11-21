@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	auth "github.com/abbot/go-http-auth"
 )
 
 const Version = "0.1 alpha"
@@ -49,24 +48,12 @@ func New() {
 	server.Watch()
 	server.ConfigWatch()
 
-	secret := func(username, realm string) string {
-
-		log.Print(username, realm)
-
-		if username == Cfg.Username {
-			return "b98e16cbc3d01734b264adba7baa3bf9"
-		}
-		return ""
-	}
-	authenticator := auth.NewDigestAuthenticator(Cfg.BaseURL, secret)
-
-	admin := map[string]auth.AuthenticatedHandlerFunc{
+	admin := map[string]http.HandlerFunc{
 		".add":  server.Add,
 		".edit": server.Edit,
 	}
 	for k, v := range admin {
-		h := authenticator.Wrap(v)
-		http.HandleFunc(path.Join(Cfg.BasePath, k), h)
+		http.HandleFunc(path.Join(Cfg.BasePath, k), server.auth(v))
 	}
 
 	http.Handle("/", http.FileServer(http.Dir(Cfg.PublicPath)))
@@ -78,7 +65,24 @@ func New() {
 	}
 }
 
-func (s *Server) Add(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
+func (s *Server) auth(orig http.HandlerFunc) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		if u, p, ok := r.BasicAuth(); ok {
+			if u == Cfg.Username && p == Cfg.Password {
+				orig(w, r)
+				return
+			}
+		}
+
+		w.Header().Set("WWW-Authenticate", `Basic realm="`+Cfg.BaseURL+`"`)
+		w.WriteHeader(401)
+		w.Write([]byte("401 Unauthorized\n"))
+	}
+}
+
+func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
@@ -124,7 +128,7 @@ func (s *Server) Add(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 	}
 }
 
-func (s *Server) Edit(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
+func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
 		doc := r.URL.Query().Get("doc")
