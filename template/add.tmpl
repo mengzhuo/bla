@@ -14,7 +14,6 @@
     <script>function logout(){
         var out = window.location.href.replace(/:\/\//, '://log:out@');
         window.location = out;
-
     }</script>
     </form>
     {{ template "editor" . | js }}

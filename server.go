@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 	"text/template"
 	"time"
@@ -51,6 +52,7 @@ func New() {
 	admin := map[string]http.HandlerFunc{
 		".add":  server.Add,
 		".edit": server.Edit,
+		".quit": server.Quit,
 	}
 	for k, v := range admin {
 		http.HandleFunc(path.Join(Cfg.BasePath, k), server.auth(v))
@@ -80,6 +82,12 @@ func (s *Server) auth(orig http.HandlerFunc) http.HandlerFunc {
 		w.WriteHeader(401)
 		w.Write([]byte("401 Unauthorized\n"))
 	}
+}
+
+func (s *Server) Quit(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Location", strings.Replace(Cfg.BaseURL, "://", "://log:out@", 1))
+	w.WriteHeader(301)
 }
 
 func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
