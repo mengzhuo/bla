@@ -11,7 +11,7 @@ import (
 
 var (
 	Cfg        *Config
-	configPath = flag.String("c", "./config.json", "")
+	configPath = flag.String("c", "./bla.config.json", "")
 )
 
 type Config struct {
