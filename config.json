@@ -7,7 +7,7 @@
 "home_articles":4,
 "content_path":"./content",
 "template_path":"./template",
-"upload_path":"./uploads",
+"upload_path":"./wp-uploads",
 "public_path":"./public",
 "favicon": "favicon.ico",
 "title":"笔记本",

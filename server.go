@@ -200,7 +200,8 @@ func (s *Server) Reset() {
 	}
 
 	uploads, _ := filepath.Abs(Cfg.UploadPath)
-	dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, Cfg.BasePath, "uploads"))
+	uploadBase := filepath.Base(uploads)
+	dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, Cfg.BasePath, uploadBase))
 
 	os.MkdirAll(filepath.Join(Cfg.PublicPath, Cfg.BasePath), 0755)
 
