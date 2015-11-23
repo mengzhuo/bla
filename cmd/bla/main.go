@@ -54,6 +54,7 @@ func New() {
 
 		PublicPath: "./bla_public",
 		Favicon:    "",
+		LinkFiles:  []string{},
 
 		TLSCertFile: "",
 		TLSKeyFile:  "",

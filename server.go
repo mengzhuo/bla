@@ -189,43 +189,33 @@ func (s *Server) Reset() {
 	os.MkdirAll(Cfg.PublicPath, 0755)
 
 	if Cfg.Favicon != "" {
-		fav, _ := filepath.Abs(Cfg.Favicon)
-		dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, "favicon.ico"))
+		Link(Cfg.Favicon, filepath.Join(Cfg.PublicPath, "favicon.ico"))
+	}
 
-		if err := os.Symlink(fav, dest); err != nil {
-			log.Print(err)
-		} else {
-			log.Print("Rebuild link:", fav, " -> ", dest)
-		}
+	for _, p := range Cfg.LinkFiles {
+		Link(p, filepath.Join(Cfg.PublicPath, filepath.Base(p)))
 	}
 
 	uploads, _ := filepath.Abs(Cfg.UploadPath)
 	uploadBase := filepath.Base(uploads)
-	dest, _ := filepath.Abs(filepath.Join(Cfg.PublicPath, Cfg.BasePath, uploadBase))
 
 	os.MkdirAll(filepath.Join(Cfg.PublicPath, Cfg.BasePath), 0755)
-
-	if err := os.Symlink(uploads, dest); err != nil {
-		log.Print(err)
-	} else {
-		log.Print("Rebuild link:", uploads, " -> ", dest)
-	}
+	Link(Cfg.UploadPath, filepath.Join(Cfg.PublicPath, Cfg.BasePath, uploadBase))
 }
 
 func (s *Server) LoadStaticFiles() {
 
 	log.Print("Rebuild from: ", Cfg.TemplatePath)
+	Link(filepath.Join(Cfg.TemplatePath, "asset"),
+		filepath.Join(Cfg.PublicPath, Cfg.BasePath, "asset"))
+
+	log.Print("Loading Asset files")
+
 	orig, err := filepath.Abs(filepath.Join(Cfg.TemplatePath, "asset"))
-	dest, err := filepath.Abs(filepath.Join(Cfg.PublicPath, Cfg.BasePath, "asset"))
 	if err != nil {
-		log.Print(err)
+		log.Fatal(err)
 	}
 
-	log.Print("Rebuild link:", orig, " -> ", dest)
-	if err := os.Symlink(orig, dest); err != nil {
-		log.Print(err)
-	}
-	log.Print("Loading Asset files")
 	filepath.Walk(orig,
 		func(path string, info os.FileInfo, e error) (err error) {
 
@@ -275,4 +265,24 @@ type Server struct {
 	StopWatch   chan bool
 	DocLock     *sync.RWMutex
 	TagLock     *sync.RWMutex
+}
+
+func Link(orig, dest string) error {
+
+	absOrig, err := filepath.Abs(orig)
+	if err != nil {
+		return err
+	}
+	absDest, err := filepath.Abs(dest)
+	if err != nil {
+		return err
+	}
+
+	if err := os.Symlink(absOrig, absDest); err != nil {
+		log.Print(err)
+		return err
+	} else {
+		log.Print("Rebuild link:", absOrig, " -> ", absDest)
+	}
+	return nil
 }
