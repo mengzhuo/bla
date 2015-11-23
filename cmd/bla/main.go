@@ -38,7 +38,7 @@ func New() {
 	cfg := &bla.Config{
 		Addr:     ":8080",
 		BaseURL:  "http://localhost:8080",
-		BasePath: "",
+		BasePath: "/",
 
 		Username: "admin",
 		Password: "",
