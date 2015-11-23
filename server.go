@@ -117,7 +117,7 @@ func (s *Server) Add(w http.ResponseWriter, r *http.Request) {
 
 		}
 
-		f, err := os.Create(filepath.Join(Cfg.ContentPath, header+".html"))
+		f, err := os.Create(filepath.Join(Cfg.ContentPath, santiSpace(header)+".html"))
 		if err != nil {
 			log.Print(err)
 			w.WriteHeader(500)
@@ -147,7 +147,7 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fp := filepath.Join(Cfg.ContentPath, doc)
+		fp := filepath.Join(Cfg.ContentPath, doc+".html")
 		if _, err := os.Stat(fp); os.IsNotExist(err) {
 			w.Write([]byte("no such doc"))
 			w.WriteHeader(404)
