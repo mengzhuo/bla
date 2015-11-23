@@ -238,6 +238,7 @@ func (s *Server) LoadTempalte() (err error) {
 		"base": path.Base,
 		"ext":  filepath.Ext,
 		"now":  time.Now,
+		"join": filepath.Join,
 	}
 	root := filepath.Join(Cfg.TemplatePath, "root.tmpl")
 	parsed := func(fname string) (t *template.Template) {
