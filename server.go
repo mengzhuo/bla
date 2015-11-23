@@ -50,9 +50,10 @@ func New() {
 	server.ConfigWatch()
 
 	admin := map[string]http.HandlerFunc{
-		".add":  server.Add,
-		".edit": server.Edit,
-		".quit": server.Quit,
+		".add":    server.Add,
+		".edit":   server.Edit,
+		".quit":   server.Quit,
+		".upload": server.UploadMedia,
 	}
 	for k, v := range admin {
 		http.HandleFunc(path.Join(Cfg.BasePath, k), server.auth(v))
