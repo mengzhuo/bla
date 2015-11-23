@@ -10,10 +10,9 @@ another blog based on golang
 
 ## Simple Tutorial
 
-``` go get -u github.com/mengzhuo/bla/cmd/bla
-```
-
-```bla new
+``` shell
+go get -u github.com/mengzhuo/bla/cmd/bla
+bla new
 ```
 
 edit your configure file "bla.config.json" and just run bla
