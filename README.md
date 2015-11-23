@@ -1,6 +1,8 @@
 # bla
 another blog based on golang
 
+![Screenshot](https://raw.githubusercontent.com/mengzhuo/bla_default_template/master/bla_screenshot.png)
+
 ## Highlights
 * Fully static file serving
 * WYSIWYG (No markdown or offline editing)
