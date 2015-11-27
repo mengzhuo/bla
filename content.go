@@ -89,7 +89,7 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 		}
 	})
 	// Make header links
-	header.ReplaceWithHtml(fmt.Sprintf(`<h1 class="title"><a href="%s">%s</a></h1>`, doc.Path, doc.Title))
+	header.ReplaceWithHtml(fmt.Sprintf(`<h1 class="title"><a href="%s" itemprop="name" >%s</a></h1>`, doc.Path, doc.Title))
 
 	//Log(doc)
 	doc.Parsed = parsed
