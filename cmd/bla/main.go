@@ -41,7 +41,7 @@ func New() {
 		BasePath: "/",
 
 		Username: "admin",
-		Password: "",
+		Password: "default",
 
 		HomeArticles: 10,
 		Title:        "Some blah",
@@ -93,7 +93,7 @@ func CreateDefaultContent() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	f, err := os.Create(path.Join(DefaultContent, "hello.html"))
+	f, err := os.Create(path.Join(DefaultContent, "Hello-from-old-time.html"))
 	if err != nil {
 		log.Fatal(err)
 	}

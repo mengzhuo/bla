@@ -148,7 +148,7 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fp := filepath.Join(Cfg.ContentPath, doc+".html")
+		fp := filepath.Join(Cfg.ContentPath, filepath.Base(doc)+".html")
 		if _, err := os.Stat(fp); os.IsNotExist(err) {
 			w.Write([]byte("no such doc"))
 			w.WriteHeader(404)
@@ -179,6 +179,7 @@ func (s *Server) Edit(w http.ResponseWriter, r *http.Request) {
 		io.Copy(bak, f)
 		bak.Close()
 		f.Close()
+		os.Remove(fp)
 	}
 }
 
