@@ -12,12 +12,15 @@ another blog based on golang
 
 ## Simple Tutorial
 
+
 ``` shell
 go get -u github.com/mengzhuo/bla/cmd/bla
 bla new
 ```
 
 edit your configure file "bla.config.json" and just run bla
+
+[![asciicast](https://asciinema.org/a/6587poxjde80zr125zq3ffom8.png)](https://asciinema.org/a/6587poxjde80zr125zq3ffom8)
 
 ## How to add post to blog?
 http://localhost:7080/.add
