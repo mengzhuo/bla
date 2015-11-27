@@ -1,7 +1,0 @@
-{{define "title"}}{{with index .Docs  0 }}{{.Title}}{{end}} - {{ .Cfg.Title}}{{end}}
-
-{{ define "content" }}
-    {{ range .Docs }}
-        {{ template "doc" . }}
-    {{ end }}
-{{ end }}
