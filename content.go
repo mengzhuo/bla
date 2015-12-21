@@ -236,7 +236,7 @@ func (s *Server) MakeSitemap() (err error) {
 	f, err := os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, "sitemap.txt"))
 	defer f.Close()
 	for i := 0; i < len(s.Docs); i += 1 {
-		f.WriteString(path.Join(Cfg.BaseURL, s.sortedDocs[i].Path))
+		_, err = f.WriteString(path.Join(Cfg.BaseURL, s.sortedDocs[i].Path))
 		f.WriteString("\n")
 	}
 	return
