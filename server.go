@@ -45,6 +45,7 @@ func New() {
 		log.Fatal(err)
 	}
 	server.MakeHome()
+	server.MakeSitemap()
 	log.Print(Cfg)
 	server.Watch()
 	server.ConfigWatch()

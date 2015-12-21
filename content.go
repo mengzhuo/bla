@@ -137,9 +137,10 @@ func (s *Server) LoadAllDocs() (err error) {
 }
 
 type rootData struct {
-	Cfg    *Config
-	Server *Server
-	Docs   []*Doc
+	Cfg        *Config
+	Server     *Server
+	Docs       []*Doc
+	IndexCount int
 }
 
 func (s *Server) newRootData() *rootData {
@@ -227,6 +228,17 @@ func (s *Server) MakeHome() (err error) {
 		j++
 	}
 
+	return
+}
+
+func (s *Server) MakeSitemap() (err error) {
+
+	f, err := os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, "sitemap.txt"))
+	defer f.Close()
+	for i := 0; i < len(s.Docs); i += 1 {
+		f.WriteString(path.Join(Cfg.BaseURL, s.sortedDocs[i].Path))
+		f.WriteString("\n")
+	}
 	return
 }
 
