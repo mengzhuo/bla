@@ -242,7 +242,7 @@ func (s *Server) MakeSitemap() (err error) {
 			return err
 		}
 		u.Path = path.Join(u.Path)
-		_, err = f.WriteString(u.Path)
+		_, err = f.WriteString(u.String())
 		f.WriteString("\n")
 	}
 	return
