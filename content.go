@@ -3,6 +3,7 @@ package bla
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -236,7 +237,12 @@ func (s *Server) MakeSitemap() (err error) {
 	f, err := os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, "sitemap.txt"))
 	defer f.Close()
 	for i := 0; i < len(s.Docs); i += 1 {
-		_, err = f.WriteString(Cfg.BaseURL + s.sortedDocs[i].Path)
+		u, err := url.Parse(Cfg.BaseURL + s.sortedDocs[i].Path)
+		if err != nil {
+			return err
+		}
+		u.Path = path.Join(u.Path)
+		_, err = f.WriteString(u.Path)
 		f.WriteString("\n")
 	}
 	return
