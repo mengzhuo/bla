@@ -184,7 +184,6 @@ func (s *Server) SaveAllDocs() (err error) {
 			log.Print(err)
 		}
 		f.Close()
-		os.Chtimes(docPubPath, d.Time, d.Time)
 	}
 
 	return
