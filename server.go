@@ -3,6 +3,7 @@ package bla
 
 import (
 	"bytes"
+	"crypto/tls"
 	"flag"
 	"io"
 	"log"
@@ -57,6 +58,7 @@ func New() {
 		".quit":   server.Quit,
 		".upload": server.UploadMedia,
 	}
+
 	for k, v := range admin {
 		http.HandleFunc(path.Join(Cfg.BasePath, k), server.auth(v))
 	}
@@ -64,7 +66,10 @@ func New() {
 	http.Handle("/", http.FileServer(http.Dir(Cfg.PublicPath)))
 
 	if Cfg.TLSKeyFile != "" && Cfg.TLSCertFile != "" {
-		log.Fatal(http.ListenAndServeTLS(Cfg.Addr, Cfg.TLSCertFile, Cfg.TLSKeyFile, nil))
+
+		tls_server := http.Server{Addr: Cfg.Addr, Handler: nil,
+			TLSConfig: &tls.Config{ClientSessionCache: tls.NewLRUClientSessionCache(100)}}
+		log.Fatal(tls_server.ListenAndServeTLS(Cfg.TLSCertFile, Cfg.TLSKeyFile))
 	} else {
 		log.Fatal(http.ListenAndServe(Cfg.Addr, nil))
 	}
