@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -234,13 +235,23 @@ func (s *Server) LoadStaticFiles() {
 		})
 }
 
+func extractHost(s string) string {
+
+	u, err := url.Parse(s)
+	if err != nil {
+		panic(err)
+	}
+	return u.Host
+}
+
 func (s *Server) LoadTempalte() (err error) {
 
 	var funcMap = template.FuncMap{
-		"base": path.Base,
-		"ext":  filepath.Ext,
-		"now":  time.Now,
-		"join": filepath.Join,
+		"base":        path.Base,
+		"ext":         filepath.Ext,
+		"now":         time.Now,
+		"join":        filepath.Join,
+		"extractHost": extractHost,
 	}
 	root := filepath.Join(Cfg.TemplatePath, "root.tmpl")
 	parsed := func(fname string) (t *template.Template) {
