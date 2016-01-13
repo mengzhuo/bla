@@ -89,7 +89,8 @@ func (s *Server) LoadDoc(path string, info os.FileInfo, e error) (err error) {
 		}
 	})
 	// Make header links
-	header.ReplaceWithHtml(fmt.Sprintf(`<h1 class="title"><a href="%s" itemprop="name" >%s</a></h1>`, doc.Path, doc.Title))
+	header.AddClass("title").Contents().Remove()
+	header.AppendHtml(fmt.Sprintf(`<a href="%s">%s</a>`, doc.Path, doc.Title))
 
 	// Update Header id
 	parsed.Find("h2,h3,h4,h5,h6").Each(func(i int, sel *goquery.Selection) {
