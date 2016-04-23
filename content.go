@@ -214,24 +214,15 @@ func (s *Server) MakeHome() (err error) {
 		log.Print(err)
 	}
 
-	j := 1
-	for i := 0; i < len(s.Docs); i += IndexNumber {
-		f, err := os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, fmt.Sprintf("index-%d", j)))
-		if err != nil {
-			log.Print(err)
-		}
+	f, err = os.Create(path.Join(Cfg.PublicPath, Cfg.BasePath, "indexes.html"))
+	if err != nil {
+		log.Print(err)
+	}
 
-		n := i + IndexNumber
-		if i+IndexNumber > len(s.sortedDocs) {
-			n = len(s.sortedDocs) - 1
-		}
+	r.Docs = s.sortedDocs
 
-		r.Docs = s.sortedDocs[i:n]
-
-		if err = s.template.index.ExecuteTemplate(f, "root", r); err != nil {
-			log.Print(err)
-		}
-		j++
+	if err = s.template.index.ExecuteTemplate(f, "root", r); err != nil {
+		log.Print(err)
 	}
 
 	return
