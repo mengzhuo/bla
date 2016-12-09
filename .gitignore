@@ -26,3 +26,4 @@ _testmain.go
 bin
 cmd/bla/bla
 content/*
+src/github.com
