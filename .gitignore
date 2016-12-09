@@ -22,6 +22,7 @@ _testmain.go
 *.exe
 *.test
 *.prof
+*.swp
 
 bin
 cmd/bla/bla
