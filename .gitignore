@@ -24,6 +24,5 @@ _testmain.go
 *.prof
 
 bin
-src
 cmd/bla/bla
 content/*
