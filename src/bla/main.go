@@ -2,7 +2,6 @@ package bla
 
 import (
 	"net/http"
-	"path/filepath"
 	"strings"
 )
 
@@ -12,10 +11,6 @@ type Server struct {
 }
 
 func buildSite(cfg *Config) {
-	filepath.Walk(cfg.ContentPath, s.loadDocAndPage)
-}
-
-func (s *Site) loadDocAndPage(p string, info *os.Info, e error) error {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
