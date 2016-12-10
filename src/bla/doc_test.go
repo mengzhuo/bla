@@ -6,8 +6,7 @@ import (
 )
 
 func TestNewRawDoc(t *testing.T) {
-	ff := `
-Hello World
+	ff := `Hello World
 2016-03-20
 golang, bla, epoch
 draft
@@ -19,4 +18,5 @@ Hohohoho
 		t.Error(err)
 	}
 	t.Log(doc)
+	t.Log(string(doc.Content))
 }

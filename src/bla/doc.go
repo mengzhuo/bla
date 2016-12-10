@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"strings"
 	"time"
 )
@@ -27,9 +28,10 @@ func newRawDoc(rdr io.Reader) (d *rawDoc, err error) {
 	var lineCnt int
 	d = &rawDoc{}
 
-	for scanner.Scan() {
+	for scanner.Scan() && lineCnt < 5 {
 		if len(scanner.Bytes()) == 0 {
-			continue
+			fmt.Println("scanner end:", lineCnt)
+			break
 		}
 		lineCnt += 1
 
@@ -49,8 +51,6 @@ func newRawDoc(rdr io.Reader) (d *rawDoc, err error) {
 			}
 		case 4:
 			d.Public = (scanner.Text() == StatusPublic)
-		default:
-			d.Content = append(d.Content, scanner.Bytes()...)
 		}
 	}
 
@@ -58,6 +58,10 @@ func newRawDoc(rdr io.Reader) (d *rawDoc, err error) {
 		return nil, fmt.Errorf("too less header %v", d)
 	}
 
+	d.Content, err = ioutil.ReadAll(rdr)
+	if err != nil {
+		return nil, err
+	}
 	return d, nil
 }
 
