@@ -20,12 +20,12 @@ var (
 func main() {
 
 	flag.Parse()
-	handler := bla.NewSite(*configPath)
+	bla.Init(*configPath)
 
 	if *certfile != "" && *keyfile != "" {
-		http.ListenAndServeTLS(*addr, *certfile, *keyfile, handler)
+		http.ListenAndServeTLS(*addr, *certfile, *keyfile, bla.Handler)
 		return
 	}
-	http.ListenAndServe(*addr, handler)
+	http.ListenAndServe(*addr, bla.Handler)
 
 }
