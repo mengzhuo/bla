@@ -13,7 +13,7 @@ const (
 	StatusPublic = "public"
 )
 
-type rawDoc struct {
+type Doc struct {
 	Title  string
 	Date   time.Time
 	Tags   []string
@@ -22,11 +22,11 @@ type rawDoc struct {
 	Content []byte
 }
 
-func newRawDoc(rdr io.Reader) (d *rawDoc, err error) {
+func newDoc(rdr io.Reader) (d *Doc, err error) {
 
 	scanner := bufio.NewScanner(rdr)
 	var lineCnt int
-	d = &rawDoc{}
+	d = &Doc{}
 
 	for scanner.Scan() && lineCnt < 5 {
 		if len(scanner.Bytes()) == 0 {
@@ -70,7 +70,7 @@ type Page struct {
 	Content string
 }
 
-type docsByTime []*rawDoc
+type docsByTime []*Doc
 
 func (s docsByTime) Len() int           { return len(s) }
 func (s docsByTime) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }

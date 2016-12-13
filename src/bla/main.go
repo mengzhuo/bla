@@ -5,25 +5,29 @@ import (
 	"strings"
 )
 
-type Server struct {
+type Site struct {
 	cfg    *Config
 	static http.Handler
+	docs   map[string]*Doc
 }
 
-func buildSite(cfg *Config) {
+func NewSite(cfg string) *http.ServeMux {
+	return &Site{cfg: cfg}
 }
 
-func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *Site) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	switch p := strings.TrimPrefix(r.URL.Path, s.cfg.BaseURL); p {
 	case "/":
 	case "/index":
 	case "/search":
-	case "/stats":
 	case "/upload":
 	case "/edit":
 	case "/admin":
 	default:
+		if _, ok := s.docs[p]; ok {
+
+		}
 		s.static.ServeHTTP(w, r)
 		return
 	}
