@@ -3,6 +3,7 @@ package main
 import (
 	"bla"
 	"flag"
+	"log"
 	"net/http"
 )
 
@@ -20,12 +21,14 @@ var (
 func main() {
 
 	flag.Parse()
-	bla.Init(*configPath)
-
+	h := bla.NewHandler(*configPath)
+	log.Print("addr: ", *addr)
+	log.Print("cfg: ", *configPath)
 	if *certfile != "" && *keyfile != "" {
-		http.ListenAndServeTLS(*addr, *certfile, *keyfile, bla.Handler)
+		log.Printf("TLS:%s, %s", *certfile, *keyfile)
+		http.ListenAndServeTLS(*addr, *certfile, *keyfile, h)
 		return
 	}
-	http.ListenAndServe(*addr, bla.Handler)
+	http.ListenAndServe(*addr, h)
 
 }
