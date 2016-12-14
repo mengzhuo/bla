@@ -51,11 +51,6 @@ func newDoc(r io.Reader) (d *Doc, err error) {
 	return
 }
 
-type Page struct {
-	Title   string
-	Content string
-}
-
 type docsByTime []*Doc
 
 func (s docsByTime) Len() int           { return len(s) }

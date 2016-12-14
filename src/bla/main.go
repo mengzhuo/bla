@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -20,6 +21,7 @@ type Handler struct {
 	cfgPath string
 	cfg     *Config
 	static  http.Handler
+	tpl     *template.Template
 
 	docs     map[string]*Doc
 	sortDocs []*Doc
@@ -31,7 +33,8 @@ func NewHandler(cfgPath string) *Handler {
 	h := &Handler{cfgPath: cfgPath}
 
 	h.loadConfig()
-	h.loadDoc()
+	h.loadTemplate()
+	h.loadData()
 	h.watch()
 
 	return h
@@ -46,20 +49,22 @@ func (s *Handler) watch() {
 
 	go func() {
 		for {
-			log.Print("looping")
 			select {
 			case event := <-watcher.Events:
 				log.Println("event:", event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					log.Println("modified file:", event.Name)
-					s.loadDoc()
+					s.loadData()
 				}
 			case err := <-watcher.Errors:
 				log.Println("error:", err)
+				return
 			}
 		}
 	}()
+
 	watcher.Add(s.cfg.DocPath)
+
 	log.Print("watching: ", s.cfg.DocPath)
 	if err != nil {
 		log.Print(err)
@@ -67,15 +72,14 @@ func (s *Handler) watch() {
 
 }
 
-func (s *Handler) loadDoc() {
+func (s *Handler) loadData() {
 	s.sortDocs = []*Doc{}
 	s.docs = map[string]*Doc{}
 	s.tags = map[string][]*Doc{}
 
 	f, err := os.Open(s.cfg.DocPath)
 	if err != nil {
-		log.Print(err)
-		return
+		log.Fatal(err)
 	}
 	defer f.Close()
 
@@ -150,8 +154,6 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch p := strings.TrimPrefix(r.URL.Path, s.cfg.BaseURL); p {
 	case "/":
 		s.ServeHome(w, r)
-	case "/tag":
-		s.ServeTag(w, r)
 	default:
 		log.Print("looking for doc:", p)
 		if doc, ok := s.docs[strings.TrimLeft(p, "/")]; ok {
@@ -183,14 +185,17 @@ func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 	if len(s.sortDocs) > s.cfg.HomeDocCount {
 		docs = docs[:s.cfg.HomeDocCount]
 	}
+	s.tpl.ExecuteTemplate(w, "index.tmpl", rootData{s, docs})
+}
 
+func (s *Handler) loadTemplate() {
+	var err error
+	s.tpl, err = template.ParseGlob(s.cfg.TemplatePath + "/*")
+	log.Print(s.tpl, err)
+	return
 }
 
 type rootData struct {
 	h    *Handler
 	docs []*Doc
-}
-
-func (s *Handler) ServeTag(w http.ResponseWriter, r *http.Request) {
-
 }

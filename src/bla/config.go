@@ -5,15 +5,17 @@ type Config struct {
 
 	DocPath      string
 	AssetPath    string
+	TemplatePath string
 	HomeDocCount int
 }
 
 func DefaultConfig() *Config {
 
 	return &Config{
-		BaseURL:   "",
-		DocPath:   "doc",
-		AssetPath: "",
+		BaseURL:      "",
+		DocPath:      "docs",
+		AssetPath:    "",
+		TemplatePath: "template",
 
 		HomeDocCount: 5,
 	}

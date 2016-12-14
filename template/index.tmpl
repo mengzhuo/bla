@@ -1,0 +1,8 @@
+{{ template "header"}}	
+{{ end }} 
+{{ range $doc := .docs }}
+		<h2>{{ doc.Title }}</h2>
+		<div>{{ doc.Content }}</div>
+{{ end }}
+{{ template "footer" }}
+{{ end }}
