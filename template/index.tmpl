@@ -1,8 +1,8 @@
-{{ template "header"}}	
-{{ end }} 
-{{ range $doc := .docs }}
-		<h2>{{ doc.Title }}</h2>
-		<div>{{ doc.Content }}</div>
+{{ define "index" }}
+{{ template "header" . }}	
+{{ range .Docs }}
+	<h2><a href="{{.SlugTitle}}">{{ .Title }}</a></h2>
+	<div>{{ .Content }}</div>
 {{ end }}
 {{ template "footer" }}
-{{ end }}
+{{end}}

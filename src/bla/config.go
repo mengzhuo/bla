@@ -6,7 +6,9 @@ type Config struct {
 	DocPath      string
 	AssetPath    string
 	TemplatePath string
+
 	HomeDocCount int
+	Title        string
 }
 
 func DefaultConfig() *Config {
@@ -18,5 +20,6 @@ func DefaultConfig() *Config {
 		TemplatePath: "template",
 
 		HomeDocCount: 5,
+		Title:        "Bla Blog",
 	}
 }

@@ -1,0 +1,9 @@
+{{define "header" }}
+	<html>
+		<head>
+			<title>{{ template "title" . }}{{ .Hdl.Cfg.Title }}</title>
+		</head>
+		<body>
+{{end}}
+
+{{define "title" }}{{ if .Doc }}{{.Doc.Title}} - {{end}}{{end}}

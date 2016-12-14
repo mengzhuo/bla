@@ -19,7 +19,7 @@ import (
 // Initialize
 type Handler struct {
 	cfgPath string
-	cfg     *Config
+	Cfg     *Config
 	static  http.Handler
 	tpl     *template.Template
 
@@ -63,9 +63,9 @@ func (s *Handler) watch() {
 		}
 	}()
 
-	watcher.Add(s.cfg.DocPath)
+	watcher.Add(s.Cfg.DocPath)
 
-	log.Print("watching: ", s.cfg.DocPath)
+	log.Print("watching: ", s.Cfg.DocPath)
 	if err != nil {
 		log.Print(err)
 	}
@@ -77,14 +77,14 @@ func (s *Handler) loadData() {
 	s.docs = map[string]*Doc{}
 	s.tags = map[string][]*Doc{}
 
-	f, err := os.Open(s.cfg.DocPath)
+	f, err := os.Open(s.Cfg.DocPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	log.Print("Loading docs from:", s.cfg.DocPath)
-	err = filepath.Walk(s.cfg.DocPath, s.docWalker)
+	log.Print("Loading docs from:", s.Cfg.DocPath)
+	err = filepath.Walk(s.Cfg.DocPath, s.docWalker)
 	if err != nil {
 		log.Print(err)
 	}
@@ -144,18 +144,17 @@ func (h *Handler) loadConfig() {
 	}
 
 	h.static = http.FileServer(http.Dir(cfg.AssetPath))
-	h.cfg = cfg
+	h.Cfg = cfg
 	log.Printf("%#v", *cfg)
 
 }
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	switch p := strings.TrimPrefix(r.URL.Path, s.cfg.BaseURL); p {
+	switch p := strings.TrimPrefix(r.URL.Path, s.Cfg.BaseURL); p {
 	case "/":
 		s.ServeHome(w, r)
 	default:
-		log.Print("looking for doc:", p)
 		if doc, ok := s.docs[strings.TrimLeft(p, "/")]; ok {
 			s.ServeDoc(doc, w, r)
 		} else {
@@ -170,7 +169,9 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Handler) ServeDoc(doc *Doc, w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, doc.Content)
+	if err := s.tpl.ExecuteTemplate(w, "doc", &rootData{s, nil, doc}); err != nil {
+		Error(err, w, r)
+	}
 }
 
 func Error(err error, w http.ResponseWriter, r *http.Request) {
@@ -182,20 +183,24 @@ func Error(err error, w http.ResponseWriter, r *http.Request) {
 func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 
 	docs := s.sortDocs
-	if len(s.sortDocs) > s.cfg.HomeDocCount {
-		docs = docs[:s.cfg.HomeDocCount]
+	if len(s.sortDocs) > s.Cfg.HomeDocCount {
+		docs = docs[:s.Cfg.HomeDocCount]
 	}
-	s.tpl.ExecuteTemplate(w, "index.tmpl", rootData{s, docs})
+
+	if err := s.tpl.ExecuteTemplate(w, "index", &rootData{s, docs, nil}); err != nil {
+		Error(err, w, r)
+	}
 }
 
 func (s *Handler) loadTemplate() {
 	var err error
-	s.tpl, err = template.ParseGlob(s.cfg.TemplatePath + "/*")
-	log.Print(s.tpl, err)
+	s.tpl, err = template.ParseGlob(s.Cfg.TemplatePath + "/*.tmpl")
+	log.Printf("%#v err:%s", s.tpl, err)
 	return
 }
 
 type rootData struct {
-	h    *Handler
-	docs []*Doc
+	Hdl  *Handler
+	Docs []*Doc
+	Doc  *Doc
 }
