@@ -6,14 +6,14 @@ import (
 )
 
 func TestNewRawDoc(t *testing.T) {
-	ff := `Hello World
-2016-03-20
-golang, bla, epoch
-draft
-
-Hohohoho
+	ff := `Title=Hello World
+	Time=2016-03-20T06:12:44Z
+Tags=golang, bla, epoch
+Public=true
++++
+### Hohohoho
 	`
-	doc, err := newRawDoc(strings.NewReader(ff))
+	doc, err := newDoc(strings.NewReader(ff))
 	if err != nil {
 		t.Error(err)
 	}

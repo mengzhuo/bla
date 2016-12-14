@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 )
@@ -32,6 +35,51 @@ func NewHandler(cfgPath string) *Handler {
 func (s *Handler) loadDoc() {
 	s.sortDocs = []*Doc{}
 	s.docs = map[string]*Doc{}
+	s.tags = map[string][]*Doc{}
+
+	f, err := os.Open(s.cfg.DocPath)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	defer f.Close()
+
+	log.Print("Loading docs from:", s.cfg.DocPath)
+	err = filepath.Walk(s.cfg.DocPath, s.docWalker)
+	if err != nil {
+		log.Print(err)
+	}
+	sort.Sort(docsByTime(s.sortDocs))
+}
+
+func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
+
+	start := time.Now()
+	if info.IsDir() || filepath.Ext(info.Name()) != ".md" {
+		return nil
+	}
+	var f *os.File
+	f, err = os.Open(p)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	var doc *Doc
+	doc, err = newDoc(f)
+	if err != nil || !doc.Public {
+		return err
+	}
+
+	doc.SlugTitle = path.Base(p)[0 : len(path.Base(p))-3]
+
+	for _, t := range doc.Tags {
+		s.tags[t] = append(s.tags[t], doc)
+	}
+	s.docs[doc.SlugTitle] = doc
+	s.sortDocs = append(s.sortDocs, doc)
+	log.Printf("loaded doc:%s in %s", doc.SlugTitle, time.Now().Sub(start).String())
+	return nil
 }
 
 func (h *Handler) loadConfig() {
@@ -40,6 +88,7 @@ func (h *Handler) loadConfig() {
 	if err != nil && os.IsExist(err) {
 		log.Panic(err)
 	}
+	defer f.Close()
 
 	log.Print("loading config")
 	cfg := DefaultConfig()
@@ -52,7 +101,7 @@ func (h *Handler) loadConfig() {
 
 	h.static = http.FileServer(http.Dir(cfg.AssetPath))
 	h.cfg = cfg
-	log.Printf("%s", cfg)
+	log.Printf("%#v", *cfg)
 
 }
 
@@ -64,8 +113,9 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "/tag":
 		s.ServeTag(w, r)
 	default:
-		if _, ok := s.docs[p]; ok {
-
+		log.Print("looking for doc:", p)
+		if doc, ok := s.docs[strings.TrimLeft(p, "/")]; ok {
+			s.ServeDoc(doc, w, r)
 		} else {
 			s.static.ServeHTTP(w, r)
 		}
@@ -77,6 +127,10 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (s *Handler) ServeDoc(doc *Doc, w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, doc.Content)
+}
+
 func Error(err error, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
 	fmt.Fprintf(w, "internal error:%s", err)
@@ -86,7 +140,10 @@ func Error(err error, w http.ResponseWriter, r *http.Request) {
 func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 
 	if len(s.sortDocs) < s.cfg.HomeDocCount {
-		s.sortDocs
 	}
+
+}
+
+func (s *Handler) ServeTag(w http.ResponseWriter, r *http.Request) {
 
 }
