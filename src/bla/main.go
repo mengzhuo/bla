@@ -175,7 +175,7 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Handler) ServeDoc(doc *Doc, w http.ResponseWriter, r *http.Request) {
-	if err := s.tpl.ExecuteTemplate(w, "doc", &rootData{s, nil, doc}); err != nil {
+	if err := s.tpl.ExecuteTemplate(w, "single", &rootData{s, nil, doc}); err != nil {
 		Error(err, w, r)
 	}
 }
