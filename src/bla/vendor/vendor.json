@@ -25,6 +25,12 @@
 			"path": "golang.org/x/sys/unix",
 			"revision": "478fcf54317e52ab69f40bb4c7a1520288d7f7ea",
 			"revisionTime": "2016-12-05T15:46:50Z"
+		},
+		{
+			"checksumSHA1": "YRD335tkMvgHzkfbfveMUpsE3Bw=",
+			"path": "gopkg.in/ini.v1",
+			"revision": "6e4869b434bd001f6983749881c7ead3545887d8",
+			"revisionTime": "2016-08-27T06:11:18Z"
 		}
 	],
 	"rootPath": "bla"
