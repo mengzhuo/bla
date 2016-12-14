@@ -11,6 +11,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/fsnotify/fsnotify"
 )
 
 // Initialize
@@ -27,9 +29,42 @@ type Handler struct {
 func NewHandler(cfgPath string) *Handler {
 
 	h := &Handler{cfgPath: cfgPath}
+
 	h.loadConfig()
 	h.loadDoc()
+	h.watch()
+
 	return h
+}
+
+func (s *Handler) watch() {
+
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			log.Print("looping")
+			select {
+			case event := <-watcher.Events:
+				log.Println("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Println("modified file:", event.Name)
+					s.loadDoc()
+				}
+			case err := <-watcher.Errors:
+				log.Println("error:", err)
+			}
+		}
+	}()
+	watcher.Add(s.cfg.DocPath)
+	log.Print("watching: ", s.cfg.DocPath)
+	if err != nil {
+		log.Print(err)
+	}
+
 }
 
 func (s *Handler) loadDoc() {
@@ -67,8 +102,12 @@ func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
 
 	var doc *Doc
 	doc, err = newDoc(f)
-	if err != nil || !doc.Public {
+	if err != nil {
 		return err
+	}
+	if !doc.Public {
+		log.Printf("doc:%s loaded but not public", p)
+		return nil
 	}
 
 	doc.SlugTitle = path.Base(p)[0 : len(path.Base(p))-3]
@@ -78,7 +117,8 @@ func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
 	}
 	s.docs[doc.SlugTitle] = doc
 	s.sortDocs = append(s.sortDocs, doc)
-	log.Printf("loaded doc:%s in %s", doc.SlugTitle, time.Now().Sub(start).String())
+	log.Printf("loaded doc:%s in %s", doc.SlugTitle,
+		time.Now().Sub(start).String())
 	return nil
 }
 
@@ -139,9 +179,16 @@ func Error(err error, w http.ResponseWriter, r *http.Request) {
 
 func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 
-	if len(s.sortDocs) < s.cfg.HomeDocCount {
+	docs := s.sortDocs
+	if len(s.sortDocs) > s.cfg.HomeDocCount {
+		docs = docs[:s.cfg.HomeDocCount]
 	}
 
+}
+
+type rootData struct {
+	h    *Handler
+	docs []*Doc
 }
 
 func (s *Handler) ServeTag(w http.ResponseWriter, r *http.Request) {
