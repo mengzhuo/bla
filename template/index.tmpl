@@ -1,8 +1,10 @@
 {{ define "index" }}
 {{ template "header" . }}	
 {{ range .Docs }}
-	<h2><a href="{{.SlugTitle}}">{{ .Title }}</a></h2>
+    <article>
+	<h2><a href="/{{.SlugTitle}}">{{ .Title }}</a></h2>
 	<div>{{ .Content }}</div>
+    </article>
 {{ end }}
 {{ template "footer" }}
 {{end}}

@@ -1,6 +1,11 @@
 {{ define "doc" }}
 {{ template "header" . }}	
+<article>
+    <header>
 	<h2>{{ .Doc.Title }}</h2>
-	<div>{{ .Doc.Content }}</div>
+    <time pubdate='{{.Doc.Time.Format "2006-01-02" }}'>{{.Doc.Time.Format "2006-01-02"}}</time>
+    </header>
+	{{ .Doc.Content }}
+</article>
 {{ template "footer" }}
 {{end}}

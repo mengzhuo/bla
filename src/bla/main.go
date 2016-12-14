@@ -48,17 +48,23 @@ func (s *Handler) watch() {
 	}
 
 	go func() {
+		ticker := time.NewTicker(time.Second)
+		mod := false
 		for {
 			select {
 			case event := <-watcher.Events:
-				log.Println("event:", event)
-				if event.Op&fsnotify.Write == fsnotify.Write {
+				if filepath.Ext(event.Name) == ".md" {
 					log.Println("modified file:", event.Name)
-					s.loadData()
+					mod = true
 				}
 			case err := <-watcher.Errors:
 				log.Println("error:", err)
 				return
+			case <-ticker.C:
+				if mod {
+					mod = false
+					s.loadData()
+				}
 			}
 		}
 	}()

@@ -1,9 +1,14 @@
 {{define "header" }}
+    <!DOCTYPE html>
 	<html>
 		<head>
 			<title>{{ template "title" . }}{{ .Hdl.Cfg.Title }}</title>
 		</head>
 		<body>
+            <header>
+                <h1><a href="/">{{.Hdl.Cfg.Title}}</a></h1>
+            </header>
+            <main>
 {{end}}
 
 {{define "title" }}{{ if .Doc }}{{.Doc.Title}} - {{end}}{{end}}
