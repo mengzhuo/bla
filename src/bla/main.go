@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -23,6 +24,7 @@ type Handler struct {
 	static  http.Handler
 	tpl     *template.Template
 
+	mu       sync.RWMutex
 	docs     map[string]*Doc
 	sortDocs []*Doc
 	tags     map[string][]*Doc
@@ -30,7 +32,10 @@ type Handler struct {
 
 func NewHandler(cfgPath string) *Handler {
 
-	h := &Handler{cfgPath: cfgPath}
+	h := &Handler{
+		cfgPath: cfgPath,
+		mu:      sync.RWMutex{},
+	}
 
 	h.loadConfig()
 	h.loadTemplate()
@@ -48,12 +53,16 @@ func (s *Handler) watch() {
 	}
 
 	go func() {
+		// loadData minial interval is 1 second
 		ticker := time.NewTicker(time.Second)
 		mod := false
 		for {
 			select {
 			case event := <-watcher.Events:
-				if filepath.Ext(event.Name) == ".md" {
+				switch ext := filepath.Ext(event.Name); ext {
+				case ".md":
+					fallthrough
+				case ".tmpl":
 					log.Println("modified file:", event.Name)
 					mod = true
 				}
@@ -64,14 +73,15 @@ func (s *Handler) watch() {
 				if mod {
 					mod = false
 					s.loadData()
+					s.loadTemplate()
 				}
 			}
 		}
 	}()
 
 	watcher.Add(s.Cfg.DocPath)
+	watcher.Add(s.Cfg.TemplatePath)
 
-	log.Print("watching: ", s.Cfg.DocPath)
 	if err != nil {
 		log.Print(err)
 	}
@@ -79,9 +89,13 @@ func (s *Handler) watch() {
 }
 
 func (s *Handler) loadData() {
+	log.Print("Loading docs from:", s.Cfg.DocPath)
+
+	s.mu.Lock()
 	s.sortDocs = []*Doc{}
 	s.docs = map[string]*Doc{}
 	s.tags = map[string][]*Doc{}
+	s.mu.Unlock()
 
 	f, err := os.Open(s.Cfg.DocPath)
 	if err != nil {
@@ -89,15 +103,17 @@ func (s *Handler) loadData() {
 	}
 	defer f.Close()
 
-	log.Print("Loading docs from:", s.Cfg.DocPath)
 	err = filepath.Walk(s.Cfg.DocPath, s.docWalker)
 	if err != nil {
 		log.Print(err)
 	}
 	sort.Sort(docsByTime(s.sortDocs))
+	log.Print("End Loading docs from:", s.Cfg.DocPath)
 }
 
 func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 
 	start := time.Now()
 	if info.IsDir() || filepath.Ext(info.Name()) != ".md" {
@@ -161,11 +177,13 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "/":
 		s.ServeHome(w, r)
 	default:
+		s.mu.RLock()
 		if doc, ok := s.docs[strings.TrimLeft(p, "/")]; ok {
 			s.ServeDoc(doc, w, r)
 		} else {
 			s.static.ServeHTTP(w, r)
 		}
+		s.mu.RLocker()
 	}
 
 	duration := time.Now().Sub(start)
@@ -187,11 +205,12 @@ func Error(err error, w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
-
+	s.mu.RLock()
 	docs := s.sortDocs
 	if len(s.sortDocs) > s.Cfg.HomeDocCount {
 		docs = docs[:s.Cfg.HomeDocCount]
 	}
+	s.mu.RUnlock()
 
 	if err := s.tpl.ExecuteTemplate(w, "index", &rootData{s, docs, nil}); err != nil {
 		Error(err, w, r)
@@ -199,10 +218,13 @@ func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Handler) loadTemplate() {
-	var err error
-	s.tpl, err = template.ParseGlob(s.Cfg.TemplatePath + "/*.tmpl")
-	log.Printf("%#v err:%s", s.tpl, err)
-	return
+	log.Printf("loding template:%s", s.Cfg.TemplatePath)
+	tpl, err := template.ParseGlob(s.Cfg.TemplatePath + "/*.tmpl")
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	s.tpl = tpl
 }
 
 type rootData struct {

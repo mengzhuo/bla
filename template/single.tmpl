@@ -1,5 +1,12 @@
 {{ define "single" }}
 {{ template "header" . }}	
 {{ template "doc" .Doc }}
+<footer>
+	<ul>
+		{{ range .Doc.Tags }}
+			<li><a href="/tag/{{ . }}">{{.}}</a></li>
+		{{end}}
+	</ul>
+</footer>
 {{ template "footer" }}
 {{end}}

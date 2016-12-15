@@ -1,8 +1,8 @@
 {{ define "doc" }}
-<article>
+<article class="col-12">
     <header>
-        <h2><a href="/{{.SlugTitle}}">{{ .Title }}</a></h2>
-    <time pubdate='{{ .Time.Format "2006-01-02" }}'>{{ .Time.Format "2006-01-02"}}</time>
+		<h3><a href="/{{.SlugTitle}}">{{ .Title }}</a></h3>
+		<time pubdate='{{ .Time.Format "2006-01-02" }}'>{{ .Time.Format "2006-01-02"}}</time>
     </header>
 	{{ .Content }}
 </article>

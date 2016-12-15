@@ -3,12 +3,15 @@
 	<html>
 		<head>
 			<title>{{ template "title" . }}{{ .Hdl.Cfg.Title }}</title>
+		    <link rel="stylesheet" href="/asset/siimple.min.css">
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>.site-header{background:grey}</style>
 		</head>
-		<body>
-            <header>
-                <h1><a href="/">{{.Hdl.Cfg.Title}}</a></h1>
+		<body class="grid grid-fluid">
+            <header class="row">
+				<h1 class="col-6"><a href="/">{{.Hdl.Cfg.Title}}</a></h1>
             </header>
-            <main>
+            <main class="row">
 {{end}}
 
 {{define "title" }}{{ if .Doc }}{{.Doc.Title}} - {{end}}{{end}}
