@@ -38,8 +38,6 @@ func NewHandler(cfgPath string) *Handler {
 	}
 
 	h.loadConfig()
-	h.loadTemplate()
-	h.loadData()
 	h.watch()
 
 	return h
@@ -56,6 +54,8 @@ func (s *Handler) watch() {
 		// loadData minial interval is 1 second
 		ticker := time.NewTicker(time.Second)
 		mod := false
+		s.loadData()
+		s.loadTemplate()
 		for {
 			select {
 			case event := <-watcher.Events:
@@ -218,6 +218,9 @@ func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Handler) loadTemplate() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	log.Printf("loding template:%s", s.Cfg.TemplatePath)
 	tpl, err := template.ParseGlob(s.Cfg.TemplatePath + "/*.tmpl")
 	if err != nil {

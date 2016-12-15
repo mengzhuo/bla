@@ -7,11 +7,13 @@
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>.site-header{background:grey}</style>
 		</head>
-		<body class="grid grid-fluid">
+		<body class="grid grid-fluid row">
+            <div class="col-1"></div>
+            <div class="col-10">
             <header class="row">
-				<h1 class="col-6"><a href="/">{{.Hdl.Cfg.Title}}</a></h1>
+				<h2 class="col-6"><a href="/">{{.Hdl.Cfg.Title}}</a></h2>
             </header>
-            <main class="row">
+            <main>
 {{end}}
 
 {{define "title" }}{{ if .Doc }}{{.Doc.Title}} - {{end}}{{end}}
