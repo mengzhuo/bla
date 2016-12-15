@@ -4,6 +4,7 @@
 		<head>
 			<title>{{ template "title" . }}{{ .Hdl.Cfg.Title }}</title>
 		    <link rel="stylesheet" href="/asset/siimple.min.css">
+<style>h1,h2,h3,h4,h5{margin-bottom:10px;}
 			<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>.site-header{background:grey}</style>
 		</head>
@@ -11,7 +12,7 @@
             <div class="col-1"></div>
             <div class="col-10">
             <header class="row">
-				<h2 class="col-6"><a href="/">{{.Hdl.Cfg.Title}}</a></h2>
+				<h2 ><a href="/">{{.Hdl.Cfg.Title}}</a></h2>
             </header>
             <main>
 {{end}}
