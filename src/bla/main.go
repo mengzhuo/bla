@@ -177,13 +177,19 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "/":
 		s.ServeHome(w, r)
 	default:
+		var (
+			doc *Doc
+			ok  bool
+		)
+
 		s.mu.RLock()
-		if doc, ok := s.docs[strings.TrimLeft(p, "/")]; ok {
+		doc, ok = s.docs[strings.TrimLeft(p, "/")]
+		s.mu.RUnlock()
+		if ok {
 			s.ServeDoc(doc, w, r)
 		} else {
 			s.static.ServeHTTP(w, r)
 		}
-		s.mu.RLocker()
 	}
 
 	duration := time.Now().Sub(start)
