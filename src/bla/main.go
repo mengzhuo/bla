@@ -22,6 +22,7 @@ type Handler struct {
 	cfgPath string
 	Cfg     *Config
 	extLib  http.Handler
+	public  http.Handler
 	tpl     *template.Template
 
 	mu       sync.RWMutex
@@ -165,7 +166,9 @@ func (h *Handler) loadConfig() {
 		log.Panic(err)
 	}
 
-	h.extLib = http.FileServer(http.Dir(cfg.ExternalLibPath))
+	h.extLib = http.StripPrefix("/libs", http.FileServer(http.Dir(cfg.ExternalLibPath)))
+	h.public = http.FileServer(http.Dir(cfg.DocPath))
+
 	h.Cfg = cfg
 	log.Printf("%#v", *cfg)
 
@@ -184,7 +187,11 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			s.ServeDoc(w, r)
 		}
 	} else {
-		s.extLib.ServeHTTP(w, r)
+		if r.URL.Path[:5] == "/libs" {
+			s.extLib.ServeHTTP(w, r)
+		} else {
+			s.public.ServeHTTP(w, r)
+		}
 	}
 
 	duration := time.Now().Sub(start)
