@@ -165,7 +165,7 @@ func (h *Handler) loadConfig() {
 		log.Panic(err)
 	}
 
-	h.static = http.FileServer(http.Dir(cfg.AssetPath))
+	h.static = http.FileServer(http.Dir(cfg.StaticPath))
 	h.Cfg = cfg
 	log.Printf("%#v", *cfg)
 
@@ -177,6 +177,7 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "/":
 		s.ServeHome(w, r)
 	default:
+
 		var (
 			doc *Doc
 			ok  bool

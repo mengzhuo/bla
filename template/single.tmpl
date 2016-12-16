@@ -2,11 +2,12 @@
 {{ template "header" . }}	
 {{ template "doc" .Doc }}
 <footer>
-	<ul>
+	<div class="tag-row">
+		Tags:
 		{{ range .Doc.Tags }}
-			<li><a href="/tag/{{ . }}">{{.}}</a></li>
+			<a href="/tag/{{ . }}" class="btn-outline btn-small">{{.}}</a>
 		{{end}}
-	</ul>
+	</div>
 </footer>
 {{ template "footer" }}
 {{end}}

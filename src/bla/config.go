@@ -5,7 +5,7 @@ type Config struct {
 	HostName string
 
 	DocPath      string
-	AssetPath    string
+	StaticPath   string
 	TemplatePath string
 
 	HomeDocCount int
@@ -17,10 +17,10 @@ func DefaultConfig() *Config {
 	return &Config{
 		BaseURL:      "",
 		DocPath:      "docs",
-		AssetPath:    "",
+		StaticPath:   "",
 		TemplatePath: "template",
 
 		HomeDocCount: 5,
-		Title:        "Bla Blog",
+		Title:        "笔记本",
 	}
 }
