@@ -21,7 +21,7 @@ import (
 type Handler struct {
 	cfgPath string
 	Cfg     *Config
-	static  http.Handler
+	extLib  http.Handler
 	tpl     *template.Template
 
 	mu       sync.RWMutex
@@ -165,7 +165,7 @@ func (h *Handler) loadConfig() {
 		log.Panic(err)
 	}
 
-	h.static = http.FileServer(http.Dir(cfg.ExternalLibPath))
+	h.extLib = http.FileServer(http.Dir(cfg.ExternalLibPath))
 	h.Cfg = cfg
 	log.Printf("%#v", *cfg)
 
@@ -173,24 +173,18 @@ func (h *Handler) loadConfig() {
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	switch p := strings.TrimPrefix(r.URL.Path, s.Cfg.BaseURL); p {
-	case "/":
-		s.ServeHome(w, r)
-	default:
-
-		var (
-			doc *Doc
-			ok  bool
-		)
-
-		s.mu.RLock()
-		doc, ok = s.docs[strings.TrimLeft(p, "/")]
-		s.mu.RUnlock()
-		if ok {
-			s.ServeDoc(doc, w, r)
-		} else {
-			s.static.ServeHTTP(w, r)
+	cnt := strings.Count(r.URL.Path, "/")
+	if cnt == 1 {
+		switch r.URL.Path {
+		case "/":
+			s.ServeHome(w, r)
+		case "/robots.txt":
+		case "/favicon.ico":
+		default:
+			s.ServeDoc(w, r)
 		}
+	} else {
+		s.extLib.ServeHTTP(w, r)
 	}
 
 	duration := time.Now().Sub(start)
@@ -199,7 +193,17 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (s *Handler) ServeDoc(doc *Doc, w http.ResponseWriter, r *http.Request) {
+func (s *Handler) ServeDoc(w http.ResponseWriter, r *http.Request) {
+
+	docName := strings.TrimLeft(r.URL.Path, "/")
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	doc, ok := s.docs[docName]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
 	if err := s.tpl.ExecuteTemplate(w, "single", &rootData{s, nil, doc}); err != nil {
 		Error(err, w, r)
 	}
