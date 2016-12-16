@@ -176,13 +176,6 @@ func (h *Handler) loadConfig() {
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	/*
-		if r.Host != s.Cfg.HostName {
-			w.Header().Add("Location", "https://"+s.Cfg.HostName)
-			w.WriteHeader(301)
-			return
-		}
-	*/
 
 	cnt := strings.Count(r.URL.Path, "/")
 	if cnt == 1 {
@@ -190,20 +183,26 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		case "/":
 			s.ServeHome(w, r)
 		case "/robots.txt":
+			s.public.ServeHTTP(w, r)
 		case "/favicon.ico":
+			s.public.ServeHTTP(w, r)
 		default:
 			s.ServeDoc(w, r)
 		}
 	} else {
-		if r.URL.Path[:5] == "/libs" {
+		switch r.URL.Path[:5] {
+		case "/libs":
 			s.extLib.ServeHTTP(w, r)
-		} else {
+		case "/tags":
+			s.ServeTag(w, r)
+		default:
 			s.public.ServeHTTP(w, r)
 		}
 	}
 
 	duration := time.Now().Sub(start)
 	w.Header().Add("Response-In", duration.String())
+	w.Header().Add("Host", s.Cfg.HostName)
 	log.Printf("%s %s %s", r.Method, r.URL.Path, duration.String())
 }
 
@@ -221,6 +220,10 @@ func (s *Handler) ServeDoc(w http.ResponseWriter, r *http.Request) {
 	if err := s.tpl.ExecuteTemplate(w, "single", &rootData{s, nil, doc}); err != nil {
 		Error(err, w, r)
 	}
+}
+
+func (s *Handler) ServeTag(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func Error(err error, w http.ResponseWriter, r *http.Request) {
