@@ -176,12 +176,13 @@ func (h *Handler) loadConfig() {
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-
-	if r.Host != s.Cfg.HostName {
-		w.Header().Add("Location", "https://"+s.Cfg.HostName)
-		w.WriteHeader(301)
-		return
-	}
+	/*
+		if r.Host != s.Cfg.HostName {
+			w.Header().Add("Location", "https://"+s.Cfg.HostName)
+			w.WriteHeader(301)
+			return
+		}
+	*/
 
 	cnt := strings.Count(r.URL.Path, "/")
 	if cnt == 1 {
