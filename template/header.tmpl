@@ -4,17 +4,14 @@
 		<head>
 			<title>{{ template "title" . }}{{ .Hdl.Cfg.Title }}</title>
 		    <link rel="stylesheet" href="/asset/siimple.min.css">
-<style>h1,h2,h3,h4,h5{margin-bottom:10px;}
+<style>h1,h2,h3,h4,h5{margin-bottom:10px;}</style>
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>.site-header{background:grey}</style>
 		</head>
-		<body class="grid grid-fluid row">
-            <div class="col-1"></div>
-            <div class="col-10">
-            <header class="row">
+		<body >
+            <header class="grid">
 				<h2 ><a href="/">{{.Hdl.Cfg.Title}}</a></h2>
             </header>
-            <main>
+            <main class="grid">
 {{end}}
 
 {{define "title" }}{{ if .Doc }}{{.Doc.Title}} - {{end}}{{end}}
