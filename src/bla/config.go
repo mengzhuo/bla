@@ -17,7 +17,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		BaseURL:      "",
 		DocPath:      "docs",
-		StaticPath:   "",
+		StaticPath:   "static",
 		TemplatePath: "template",
 
 		HomeDocCount: 5,
