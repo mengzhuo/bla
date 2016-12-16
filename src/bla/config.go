@@ -1,7 +1,8 @@
 package bla
 
 type Config struct {
-	BaseURL string
+	BaseURL  string
+	HostName string
 
 	DocPath      string
 	AssetPath    string

@@ -16,6 +16,7 @@ var (
 	keyfile    = flag.String("key", "", "cert file path")
 	addr       = flag.String("addr", ":8080", "listen port")
 	configPath = flag.String("config", DefaultConfig, "default config path")
+	zip        = flag.Bool("gzip", true, "gzip compress")
 )
 
 func main() {
@@ -24,6 +25,10 @@ func main() {
 	h := bla.NewHandler(*configPath)
 	log.Print("addr: ", *addr)
 	log.Print("cfg: ", *configPath)
+
+	if *zip {
+		log.Print("start gzip")
+	}
 	if *certfile != "" && *keyfile != "" {
 		log.Printf("TLS:%s, %s", *certfile, *keyfile)
 		http.ListenAndServeTLS(*addr, *certfile, *keyfile, h)
@@ -31,4 +36,13 @@ func main() {
 	}
 	http.ListenAndServe(*addr, h)
 
+}
+
+type GzipHandler struct {
+}
+
+func (g *GzipHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch s := r.Header.Get("Accept-Encoding"); s {
+
+	}
 }
