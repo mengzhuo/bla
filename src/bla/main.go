@@ -165,7 +165,7 @@ func (h *Handler) loadConfig() {
 		log.Panic(err)
 	}
 
-	h.static = http.FileServer(http.Dir(cfg.StaticPath))
+	h.static = http.FileServer(http.Dir(cfg.ExternalLibPath))
 	h.Cfg = cfg
 	log.Printf("%#v", *cfg)
 
