@@ -176,6 +176,13 @@ func (h *Handler) loadConfig() {
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
+
+	if r.Host != s.Cfg.HostName {
+		w.Header().Add("Location", "https://"+s.Cfg.HostName)
+		w.WriteHeader(301)
+		return
+	}
+
 	cnt := strings.Count(r.URL.Path, "/")
 	if cnt == 1 {
 		switch r.URL.Path {
@@ -197,7 +204,6 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	duration := time.Now().Sub(start)
 	w.Header().Add("Response-In", duration.String())
 	log.Printf("%s %s %s", r.Method, r.URL.Path, duration.String())
-
 }
 
 func (s *Handler) ServeDoc(w http.ResponseWriter, r *http.Request) {

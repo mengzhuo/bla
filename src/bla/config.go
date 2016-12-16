@@ -15,7 +15,9 @@ type Config struct {
 func DefaultConfig() *Config {
 
 	return &Config{
-		BaseURL:         "",
+		BaseURL:  "",
+		HostName: "meng.zhuo.blog",
+
 		DocPath:         "docs",
 		ExternalLibPath: "libs",
 		TemplatePath:    "template",
