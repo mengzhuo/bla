@@ -217,13 +217,26 @@ func (s *Handler) ServeDoc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := s.tpl.ExecuteTemplate(w, "single", &rootData{s, nil, doc}); err != nil {
+	if err := s.tpl.ExecuteTemplate(w, "single", &singleData{s, doc.Title, doc}); err != nil {
 		Error(err, w, r)
 	}
 }
 
 func (s *Handler) ServeTag(w http.ResponseWriter, r *http.Request) {
 
+	tagName := r.URL.Path[6:]
+	log.Println("tagName=", tagName)
+
+	docs, ok := s.tags[tagName]
+
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	sort.Sort(docsByTime(docs))
+	if err := s.tpl.ExecuteTemplate(w, "tag_page", &tagData{s, tagName, docs, tagName}); err != nil {
+		Error(err, w, r)
+	}
 }
 
 func Error(err error, w http.ResponseWriter, r *http.Request) {
@@ -240,7 +253,7 @@ func (s *Handler) ServeHome(w http.ResponseWriter, r *http.Request) {
 	}
 	s.mu.RUnlock()
 
-	if err := s.tpl.ExecuteTemplate(w, "index", &rootData{s, docs, nil}); err != nil {
+	if err := s.tpl.ExecuteTemplate(w, "index", &mulDocData{s, "", docs}); err != nil {
 		Error(err, w, r)
 	}
 }
@@ -258,8 +271,21 @@ func (s *Handler) loadTemplate() {
 	s.tpl = tpl
 }
 
-type rootData struct {
-	Hdl  *Handler
-	Docs []*Doc
-	Doc  *Doc
+type mulDocData struct {
+	Hdl   *Handler
+	Title string
+	Docs  []*Doc
+}
+
+type singleData struct {
+	Hdl   *Handler
+	Title string
+	Doc   *Doc
+}
+
+type tagData struct {
+	Hdl     *Handler
+	Title   string
+	Docs    []*Doc
+	TagName string
 }
