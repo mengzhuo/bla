@@ -175,7 +175,6 @@ func (h *Handler) loadConfig() {
 }
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	start := time.Now()
 
 	cnt := strings.Count(r.URL.Path, "/")
 	if cnt == 1 {
@@ -199,11 +198,6 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			s.public.ServeHTTP(w, r)
 		}
 	}
-
-	duration := time.Now().Sub(start)
-	w.Header().Add("Response-In", duration.String())
-	w.Header().Add("Host", s.Cfg.HostName)
-	log.Printf("%s %s %s", r.Method, r.URL.Path, duration.String())
 }
 
 func (s *Handler) ServeDoc(w http.ResponseWriter, r *http.Request) {
