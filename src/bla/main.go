@@ -169,6 +169,7 @@ func (s *Handler) saveAll() (err error) {
 			return
 		}
 	}
+	log.Println("save completed")
 	return nil
 }
 
