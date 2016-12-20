@@ -2,6 +2,7 @@ package bla
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -74,6 +75,7 @@ func (s *Handler) watch() {
 		// loadData minial interval is 1 second
 		ticker := time.NewTicker(500 * time.Millisecond)
 		mod := true
+		rootChange := true
 
 		for {
 			select {
@@ -82,36 +84,71 @@ func (s *Handler) watch() {
 				case ".md", ".json", ".tmpl":
 					log.Println("modified file:", event.Name)
 					mod = true
+				case ".swp":
+					continue
 				}
+
+				rootChange = true
 			case err := <-watcher.Errors:
 				log.Println("error:", err)
 				return
 			case <-ticker.C:
-				if !mod {
-					continue
+				if mod {
+					mod = false
+					s.loadData()
+					s.loadTemplate()
 				}
-				mod = false
-				s.loadData()
-				s.loadTemplate()
-				err := s.saveAll()
-				if err != nil {
-					log.Fatal("can't save docs:", err)
+
+				if rootChange {
+					rootChange = false
+					err := s.saveAll()
+					if err != nil {
+						log.Fatal("can't save docs:", err)
+					}
 				}
 			}
 		}
 	}()
 
+	watcher.Add(s.Cfg.RootPath)
 	watcher.Add(s.docPath)
 	watcher.Add(s.templatePath)
-	watcher.Add(s.cfgPath)
 
 	if err != nil {
 		log.Print(err)
 	}
+}
 
+func (s *Handler) clearAllTmp(exclude string) (err error) {
+	realExcluded, err := filepath.Abs(exclude)
+	if err != nil {
+		return err
+	}
+	old, err := filepath.Glob(filepath.Join(os.TempDir(), "bla*"))
+	if err != nil {
+		return err
+	}
+
+	for _, path := range old {
+		realPath, err := filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+		if realPath == realExcluded {
+			continue
+		}
+		log.Println("removing old public", realPath)
+		os.RemoveAll(realPath)
+	}
+	return nil
 }
 
 func (s *Handler) saveAll() (err error) {
+
+	s.publicPath, err = ioutil.TempDir("", "bla")
+	if err != nil {
+		return err
+	}
 
 	log.Print("Saving all docs...")
 	s.mu.Lock()
@@ -128,7 +165,6 @@ func (s *Handler) saveAll() (err error) {
 	if err != nil {
 		return
 	}
-
 	log.Printf("saving all docs...")
 	for _, doc := range s.docs {
 		f, err = os.Create(filepath.Join(s.publicPath, doc.SlugTitle))
@@ -182,11 +218,12 @@ func (s *Handler) saveAll() (err error) {
 	log.Printf("linking all dir in %s", s.Cfg.RootPath)
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
 	log.Println("save completed")
+	s.public = http.FileServer(http.Dir(s.publicPath))
+	s.clearAllTmp(s.publicPath)
 	return nil
 }
 
 func (s *Handler) linkToPublic(path string, info os.FileInfo, err error) error {
-
 	if path == s.Cfg.RootPath {
 		return nil
 	}
@@ -196,10 +233,9 @@ func (s *Handler) linkToPublic(path string, info os.FileInfo, err error) error {
 	}
 
 	switch base := filepath.Base(path); base {
-	case "template", "docs", "libs", ".public", "":
+	case "template", "docs", ".public", "":
 		return nil
 	default:
-		log.Print("**** ", path)
 		realPath, err := filepath.Abs(path)
 		if err != nil {
 			return err
@@ -209,6 +245,9 @@ func (s *Handler) linkToPublic(path string, info os.FileInfo, err error) error {
 
 		err = os.Symlink(realPath, target)
 		if err != nil {
+			if os.IsExist(err) {
+				return nil
+			}
 			log.Fatal(err)
 		}
 	}
@@ -292,11 +331,8 @@ func (h *Handler) loadConfig() {
 		log.Panic(err)
 	}
 
-	h.publicPath = filepath.Join(cfg.RootPath, ".public")
 	h.templatePath = filepath.Join(cfg.RootPath, "template")
 	h.docPath = filepath.Join(cfg.RootPath, "docs")
-
-	h.public = http.FileServer(http.Dir(h.publicPath))
 
 	h.Cfg = cfg
 	log.Printf("%#v", *cfg)
