@@ -17,6 +17,7 @@ import (
 	"golang.org/x/net/webdav"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/goji/httpauth"
 )
 
 // Initialize
@@ -61,7 +62,11 @@ func (s *Handler) loadWebDav() {
 		FileSystem: fs,
 		LockSystem: ls,
 	}
-	s.webfs = handler
+	th := throttled.Interval(throttled.PerSec(10),
+		1, &throttled.VaryBy{Path: true}, 50)
+	wrapper := httpauth.SimpleBasicAuth("admin", s.Cfg.Password)
+
+	s.webfs = th.Throttle(wrapper(handler))
 }
 
 func (s *Handler) watch() {

@@ -9,6 +9,7 @@ type Config struct {
 
 	HomeDocCount int
 	Title        string
+	Password     string
 }
 
 func DefaultConfig() *Config {
@@ -26,5 +27,6 @@ func DefaultConfig() *Config {
 
 		HomeDocCount: 5,
 		Title:        "笔记本",
+		Password:     "wtf?",
 	}
 }
