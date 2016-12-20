@@ -4,10 +4,8 @@ type Config struct {
 	BaseURL  string
 	HostName string
 
-	DocPath      string
-	TemplatePath string
-	PublicPath   string
-	LinkPath     []string
+	RootPath string
+	LinkPath []string
 
 	HomeDocCount int
 	Title        string
@@ -23,10 +21,7 @@ func DefaultConfig() *Config {
 		BaseURL:  "",
 		HostName: "meng.zhuo.blog",
 
-		DocPath:      "docs",
-		PublicPath:   "public",
-		TemplatePath: "template",
-
+		RootPath: "root",
 		LinkPath: defaultLinks,
 
 		HomeDocCount: 5,

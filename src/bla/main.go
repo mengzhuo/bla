@@ -12,6 +12,8 @@ import (
 	"text/template"
 	"time"
 
+	"golang.org/x/net/webdav"
+
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -20,7 +22,12 @@ type Handler struct {
 	cfgPath string
 	Cfg     *Config
 	public  http.Handler
+	webfs   http.Handler
 	tpl     *template.Template
+
+	publicPath   string
+	templatePath string
+	docPath      string
 
 	mu       sync.RWMutex
 	docs     map[string]*Doc
@@ -37,8 +44,22 @@ func NewHandler(cfgPath string) *Handler {
 
 	h.loadConfig()
 	h.watch()
+	h.loadWebDav()
 
 	return h
+}
+
+func (s *Handler) loadWebDav() {
+
+	fs := webdav.Dir(s.Cfg.RootPath)
+	ls := webdav.NewMemLS()
+
+	handler := &webdav.Handler{
+		Prefix:     "/fs",
+		FileSystem: fs,
+		LockSystem: ls,
+	}
+	s.webfs = handler
 }
 
 func (s *Handler) watch() {
@@ -79,8 +100,8 @@ func (s *Handler) watch() {
 		}
 	}()
 
-	watcher.Add(s.Cfg.DocPath)
-	watcher.Add(s.Cfg.TemplatePath)
+	watcher.Add(s.docPath)
+	watcher.Add(s.templatePath)
 	watcher.Add(s.cfgPath)
 
 	if err != nil {
@@ -96,20 +117,20 @@ func (s *Handler) saveAll() (err error) {
 	defer s.mu.Unlock()
 
 	log.Println("Deleting public...")
-	err = os.RemoveAll(s.Cfg.PublicPath)
+	err = os.RemoveAll(s.publicPath)
 	if err != nil {
 		return
 	}
 
 	var f *os.File
-	err = os.MkdirAll(s.Cfg.PublicPath, 0755)
+	err = os.MkdirAll(s.publicPath, 0755)
 	if err != nil {
 		return
 	}
 
 	log.Printf("saving all docs...")
 	for _, doc := range s.docs {
-		f, err = os.Create(filepath.Join(s.Cfg.PublicPath, doc.SlugTitle))
+		f, err = os.Create(filepath.Join(s.publicPath, doc.SlugTitle))
 		if err != nil {
 			return
 		}
@@ -127,7 +148,7 @@ func (s *Handler) saveAll() (err error) {
 		docs = s.sortDocs
 	}
 
-	f, err = os.Create(filepath.Join(s.Cfg.PublicPath, "index.html"))
+	f, err = os.Create(filepath.Join(s.publicPath, "index.html"))
 	if err != nil {
 		return
 	}
@@ -139,13 +160,13 @@ func (s *Handler) saveAll() (err error) {
 	}
 
 	log.Printf("saving all tags...")
-	err = os.MkdirAll(filepath.Join(s.Cfg.PublicPath, "tags"), 0755)
+	err = os.MkdirAll(filepath.Join(s.publicPath, "tags"), 0755)
 	if err != nil {
 		return
 	}
 
 	for tagName, docs := range s.tags {
-		f, err = os.Create(filepath.Join(s.Cfg.PublicPath, "/tags/", tagName))
+		f, err = os.Create(filepath.Join(s.publicPath, "/tags/", tagName))
 		if err != nil {
 			return
 		}
@@ -164,7 +185,7 @@ func (s *Handler) saveAll() (err error) {
 		if err != nil {
 			return
 		}
-		err = os.Symlink(realPath, filepath.Join(s.Cfg.PublicPath, p))
+		err = os.Symlink(realPath, filepath.Join(s.publicPath, p))
 		if err != nil {
 			return
 		}
@@ -174,7 +195,7 @@ func (s *Handler) saveAll() (err error) {
 }
 
 func (s *Handler) loadData() {
-	log.Print("Loading docs from:", s.Cfg.DocPath)
+	log.Print("Loading docs from:", s.docPath)
 
 	s.mu.Lock()
 	s.sortDocs = []*Doc{}
@@ -182,18 +203,18 @@ func (s *Handler) loadData() {
 	s.tags = map[string][]*Doc{}
 	s.mu.Unlock()
 
-	f, err := os.Open(s.Cfg.DocPath)
+	f, err := os.Open(s.docPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 
-	err = filepath.Walk(s.Cfg.DocPath, s.docWalker)
+	err = filepath.Walk(s.docPath, s.docWalker)
 	if err != nil {
 		log.Print(err)
 	}
 	sort.Sort(docsByTime(s.sortDocs))
-	log.Print("End Loading docs from:", s.Cfg.DocPath)
+	log.Print("End Loading docs from:", s.docPath)
 }
 
 func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
@@ -250,7 +271,11 @@ func (h *Handler) loadConfig() {
 		log.Panic(err)
 	}
 
-	h.public = http.FileServer(http.Dir(cfg.PublicPath))
+	h.publicPath = filepath.Join(cfg.RootPath, "public")
+	h.templatePath = filepath.Join(cfg.RootPath, "template")
+	h.docPath = filepath.Join(cfg.RootPath, "docs")
+
+	h.public = http.FileServer(http.Dir(h.publicPath))
 
 	h.Cfg = cfg
 	log.Printf("%#v", *cfg)
@@ -259,23 +284,19 @@ func (h *Handler) loadConfig() {
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	if r.URL.Path == "/admin" {
-		s.ServeAdmin(w, r)
+	if r.URL.Path[:3] == "/fs" {
+		s.webfs.ServeHTTP(w, r)
 	} else {
 		s.public.ServeHTTP(w, r)
 	}
-}
-
-func (s *Handler) ServeAdmin(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func (s *Handler) loadTemplate() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	log.Printf("loding template:%s", s.Cfg.TemplatePath)
-	tpl, err := template.ParseGlob(s.Cfg.TemplatePath + "/*.tmpl")
+	log.Printf("loding template:%s", s.templatePath)
+	tpl, err := template.ParseGlob(s.templatePath + "/*.tmpl")
 	if err != nil {
 		log.Print(err)
 		return
