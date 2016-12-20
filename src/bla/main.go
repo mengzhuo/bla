@@ -272,7 +272,7 @@ func (h *Handler) loadConfig() {
 		log.Panic(err)
 	}
 
-	h.publicPath = filepath.Join(cfg.RootPath, "public")
+	h.publicPath = filepath.Join(cfg.RootPath, ".public")
 	h.templatePath = filepath.Join(cfg.RootPath, "template")
 	h.docPath = filepath.Join(cfg.RootPath, "docs")
 
