@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"text/template"
 	"time"
@@ -284,7 +285,7 @@ func (h *Handler) loadConfig() {
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	if r.URL.Path[:3] == "/fs" {
+	if strings.HasPrefix(r.URL.Path, "/fs") {
 		s.webfs.ServeHTTP(w, r)
 	} else {
 		s.public.ServeHTTP(w, r)
