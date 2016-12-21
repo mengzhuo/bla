@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bla"
 	"flag"
 	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/mengzhuo/bla"
 )
 
 const (
