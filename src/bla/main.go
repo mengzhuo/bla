@@ -61,7 +61,8 @@ func (s *Handler) loadWebDav() {
 		FileSystem: fs,
 		LockSystem: ls,
 	}
-	s.webfs = handler
+	a := NewAuthRateByIPHandler(handler, s.Cfg.Password, s.Cfg.Password, 3)
+	s.webfs = a
 }
 
 func (s *Handler) watch() {
