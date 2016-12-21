@@ -3,7 +3,6 @@ package bla
 import (
 	"encoding/base64"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -27,9 +26,10 @@ type authRateByIPHandler struct {
 
 	username, password string
 	limit              int
+	realm              string
 }
 
-func NewAuthRateByIPHandler(origin http.Handler, username, password string, limit int) *authRateByIPHandler {
+func NewAuthRateByIPHandler(realm string, origin http.Handler, username, password string, limit int) *authRateByIPHandler {
 
 	ticker := time.NewTicker(time.Minute)
 
@@ -41,13 +41,13 @@ func NewAuthRateByIPHandler(origin http.Handler, username, password string, limi
 		username,
 		password,
 		limit,
+		realm,
 	}
 
 	go func() {
 		for {
 			<-a.ticker.C
 			a.mu.Lock()
-			log.Println("clear recored ")
 			for k, _ := range a.record {
 				delete(a.record, k)
 			}
@@ -69,7 +69,7 @@ func (a *authRateByIPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.Header().Set("WWW-Authenticate", `Basic realm="Bla WebFs"`)
+	w.Header().Set("WWW-Authenticate", fmt.Sprintf(`Basic realm="webfs@%s"`, a.realm))
 	if !a.checkAndLimit(w, r) {
 		w.WriteHeader(401)
 		return
@@ -106,7 +106,6 @@ func (a *authRateByIPHandler) checkAndLimit(w http.ResponseWriter, r *http.Reque
 		}
 		a.record[ip] = rec + 1
 		a.mu.Unlock()
-		log.Printf("ip:%s login failed %d", ip, rec)
 	}
 	return result
 }

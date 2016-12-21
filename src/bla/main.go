@@ -61,7 +61,8 @@ func (s *Handler) loadWebDav() {
 		FileSystem: fs,
 		LockSystem: ls,
 	}
-	a := NewAuthRateByIPHandler(handler, s.Cfg.Password, s.Cfg.Password, 3)
+	a := NewAuthRateByIPHandler(s.Cfg.HostName, handler, s.Cfg.UserName,
+		s.Cfg.Password, 3)
 	s.webfs = a
 }
 
