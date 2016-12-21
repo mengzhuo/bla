@@ -1,102 +1,65 @@
 package main
 
 import (
-	"encoding/json"
+	"bla"
 	"flag"
 	"log"
-	"os"
-	"os/exec"
-	"path"
-
-	"github.com/mengzhuo/bla"
+	"net/http"
+	"sync"
+	"time"
 )
 
 const (
-	DefaultConfig  = "bla.config.json"
-	DefaultContent = "bla_content"
+	DefaultConfig = "config.json"
+)
+
+var (
+	certfile   = flag.String("cert", "", "cert file path")
+	keyfile    = flag.String("key", "", "cert file path")
+	addr       = flag.String("addr", ":8080", "listen port")
+	configPath = flag.String("config", DefaultConfig, "default config path")
+	logPool    = sync.Pool{New: func() interface{} { return &LogWriter{nil, 200} }}
 )
 
 func main() {
 
 	flag.Parse()
-	if len(flag.Args()) > 0 && flag.Args()[0] == "new" {
-		New()
-		FetchDefaultTemplate()
-		CreateDefaultContent()
-	} else {
-		bla.New()
+	h := bla.NewHandler(*configPath)
+	log.Print("addr: ", *addr)
+	log.Print("cfg: ", *configPath)
+
+	lh := logTimeAndStatus(h)
+
+	if *certfile != "" && *keyfile != "" {
+		log.Printf("TLS:%s, %s", *certfile, *keyfile)
+		http.ListenAndServeTLS(*addr, *certfile, *keyfile, lh)
+		return
 	}
+	http.ListenAndServe(*addr, lh)
 
 }
 
-func New() {
+func logTimeAndStatus(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
 
-	if _, err := os.Stat(DefaultConfig); !os.IsNotExist(err) {
-		log.Fatalf("Already has default config:%s", DefaultConfig)
-	}
+		writer := logPool.Get().(*LogWriter)
+		writer.ResponseWriter = w
+		writer.statusCode = 200
 
-	cfg := &bla.Config{
-		Addr:     ":8080",
-		BaseURL:  "http://localhost:8080",
-		BasePath: "/",
-
-		Username: "admin",
-		Password: "default",
-
-		HomeArticles: 10,
-		Title:        "Some blah",
-		Footer:       "My daily blog",
-		DocURLFormat: "%s",
-
-		ContentPath:  DefaultContent,
-		UploadPath:   "./bla_uploads",
-		TemplatePath: "./bla_default_template",
-
-		PublicPath: "./bla_public",
-		Favicon:    "",
-		LinkFiles:  []string{},
-
-		TLSCertFile: "",
-		TLSKeyFile:  "",
-	}
-
-	f, err := os.Create("bla.config.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	b, err := json.MarshalIndent(cfg, "", "    ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	f.Write(b)
-	log.Printf("new config :\n%s", b)
-	return
-
+		handler.ServeHTTP(writer, r)
+		log.Printf("%s %s %s %s %d", r.RemoteAddr,
+			r.Method, r.URL.Path, time.Now().Sub(start), writer.statusCode)
+		logPool.Put(writer)
+	})
 }
 
-func FetchDefaultTemplate() {
-	cmd := exec.Command("git", "clone", "--depth=1", "https://github.com/mengzhuo/bla_default_template.git")
-	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
-	}
-	cmd.Wait()
+type LogWriter struct {
+	http.ResponseWriter
+	statusCode int
 }
 
-func CreateDefaultContent() {
-
-	if _, err := os.Stat(DefaultContent); !os.IsNotExist(err) {
-		log.Fatalf("Already has default config:%s", DefaultContent)
-	}
-
-	err := os.MkdirAll(DefaultContent, 0755)
-	if err != nil {
-		log.Fatal(err)
-	}
-	f, err := os.Create(path.Join(DefaultContent, "Hello-from-old-time.html"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	f.WriteString(`<h1>Hello from old time</h1><p class="date">1970-01-01</p><p> Blah!</p>`)
-	defer f.Close()
+func (l *LogWriter) WriteHeader(i int) {
+	l.statusCode = i
+	l.ResponseWriter.WriteHeader(i)
 }

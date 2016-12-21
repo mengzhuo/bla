@@ -22,8 +22,11 @@ _testmain.go
 *.exe
 *.test
 *.prof
+*.swp
 
 bin
-src
 cmd/bla/bla
-content/*
+src/github.com
+root/docs
+root/asset
+root/.public

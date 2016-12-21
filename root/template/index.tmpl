@@ -1,0 +1,7 @@
+{{ define "index" }}
+{{ template "header" . }}	
+{{ range .Docs }}
+    {{ template "doc" . }}
+{{ end }}
+{{ template "footer" }}
+{{end}}
