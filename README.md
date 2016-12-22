@@ -14,8 +14,9 @@ Blog/Lite-CMS build on Automatic static file serving
 ## TODO
 
 - [ ] Serve Let's encrypt
+- [x] Reload TLS certificate
 - [ ] HTTP jump to HTTPs
 - [ ] RPM/Deb pack
 - [ ] default doc generate
 - [ ] expvar
-- [ ] access log
+- [x] access log
