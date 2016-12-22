@@ -20,3 +20,4 @@ Blog/Lite-CMS build on Automatic static file serving
 - [ ] default doc generate
 - [ ] expvar
 - [x] access log
+- [ ] service file
