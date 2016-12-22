@@ -49,8 +49,10 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 		writer.statusCode = 200
 
 		handler.ServeHTTP(writer, r)
-		log.Printf("%s %s %s %s %d", r.RemoteAddr,
-			r.Method, r.URL.Path, time.Now().Sub(start), writer.statusCode)
+		log.Printf("%s %s %s %s %s %d",
+			time.Now().Format("2006-01-02 15:04:05"),
+			r.RemoteAddr, r.Method, r.URL.Path,
+			time.Now().Sub(start), writer.statusCode)
 		logPool.Put(writer)
 	})
 }
