@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -36,11 +37,15 @@ func main() {
 		http.ListenAndServeTLS(*addr, *certfile, *keyfile, lh)
 		return
 	}
+
 	http.ListenAndServe(*addr, lh)
 
 }
 
 func logTimeAndStatus(handler http.Handler) http.Handler {
+
+	accessLogger := log.New(os.Stdout, "", log.LstdFlags)
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
@@ -49,8 +54,7 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 		writer.statusCode = 200
 
 		handler.ServeHTTP(writer, r)
-		log.Printf("%s %s %s %s %s %d",
-			time.Now().Format("2006-01-02 15:04:05"),
+		accessLogger.Printf("%s %s %s %s %d",
 			r.RemoteAddr, r.Method, r.URL.Path,
 			time.Now().Sub(start), writer.statusCode)
 		logPool.Put(writer)
