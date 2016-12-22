@@ -46,9 +46,8 @@ func main() {
 		server.TLSConfig = &tls.Config{}
 		server.TLSConfig.GetCertificate = getCertificate
 		log.Printf("TLS:%s, %s", *certfile, *keyfile)
-		server.ListenAndServeTLS(*certfile, *keyfile)
 		watchReloadCert()
-		return
+		log.Fatal(server.ListenAndServeTLS(*certfile, *keyfile))
 	}
 	server.ListenAndServe()
 
