@@ -57,7 +57,7 @@ func (s *Handler) loadWebDav() {
 	ls := webdav.NewMemLS()
 
 	handler := &webdav.Handler{
-		Prefix:     "/",
+		Prefix:     "/fs",
 		FileSystem: fs,
 		LockSystem: ls,
 	}
@@ -343,10 +343,10 @@ func (h *Handler) loadConfig() {
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "GET" {
-		s.public.ServeHTTP(w, r)
-	} else {
+	if strings.HasPrefix(r.URL.Path, "/fs") {
 		s.webfs.ServeHTTP(w, r)
+	} else {
+		s.public.ServeHTTP(w, r)
 	}
 }
 
