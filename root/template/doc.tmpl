@@ -2,7 +2,9 @@
 <article >
     <header class="row">
 		<h2><a href="/{{.SlugTitle}}">{{ .Title }}</a></h2>
-        <div class="time"><time pubdate='{{ .Time.Format "2006-01-02" }}'>{{ .Time.Format "2006-01-02"}}</time></div>
+        <div class="meta">
+		<time pubdate='{{ .Time.Format "2006-01-02" }}'>{{ .Time.Format "2006-01-02"}}</time>
+	</div>
     </header>
 	{{ .Content }}
 </article>
