@@ -2,8 +2,10 @@ package bla
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/user"
+	"strings"
 )
 
 type Config struct {
@@ -22,18 +24,24 @@ type Config struct {
 func DefaultConfig() *Config {
 
 	defaultLinks := []string{
-		"libs", "asset",
+		"libs",
 	}
-	name := user.Current().Name
+	current, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+	name := current.Username
+	host, _ := os.Hostname()
+
 	return &Config{
 		BaseURL:  "",
-		HostName: os.Hostname(),
+		HostName: host,
 
 		RootPath: "root",
 		LinkPath: defaultLinks,
 
 		HomeDocCount: 5,
-		Title:        fmt.Sprintf("%s's blog", name),
+		Title:        fmt.Sprintf("%s's blog", strings.Title(name)),
 		UserName:     name,
 		Password:     "PLEASE_UPDATE_PASSWORD!",
 	}
