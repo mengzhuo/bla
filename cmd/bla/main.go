@@ -1,11 +1,14 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/mengzhuo/bla"
@@ -21,24 +24,33 @@ var (
 	addr       = flag.String("addr", ":8080", "listen port")
 	configPath = flag.String("config", DefaultConfig, "default config path")
 	logPool    = sync.Pool{New: func() interface{} { return &LogWriter{nil, 200} }}
+
+	tlsCert *tls.Certificate
+	server  *http.Server
 )
 
 func main() {
 
 	flag.Parse()
+	log.Printf("pid:%d", os.Getpid())
+
 	h := bla.NewHandler(*configPath)
 	log.Print("addr: ", *addr)
 	log.Print("cfg: ", *configPath)
 
 	lh := logTimeAndStatus(h)
+	server = &http.Server{Addr: *addr, Handler: lh}
 
 	if *certfile != "" && *keyfile != "" {
+
+		server.TLSConfig = &tls.Config{}
+		server.TLSConfig.GetCertificate = getCertificate
 		log.Printf("TLS:%s, %s", *certfile, *keyfile)
-		http.ListenAndServeTLS(*addr, *certfile, *keyfile, lh)
+		server.ListenAndServeTLS(*certfile, *keyfile)
+		watchReloadCert()
 		return
 	}
-
-	http.ListenAndServe(*addr, lh)
+	server.ListenAndServe()
 
 }
 
@@ -69,4 +81,30 @@ type LogWriter struct {
 func (l *LogWriter) WriteHeader(i int) {
 	l.statusCode = i
 	l.ResponseWriter.WriteHeader(i)
+}
+
+func loadCertificate() {
+
+	log.Println("Loading new certs")
+	cert, err := tls.LoadX509KeyPair(*certfile, *keyfile)
+	if err != nil {
+		log.Println("load cert failed keep old", err)
+		return
+	}
+	tlsCert = &cert
+}
+
+func watchReloadCert() {
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGUSR1)
+		for range c {
+			log.Print("got reload cert signal")
+			loadCertificate()
+		}
+	}()
+}
+
+func getCertificate(ch *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
+	return tlsCert, nil
 }
