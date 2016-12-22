@@ -83,7 +83,7 @@ func (s *Handler) watch() {
 		}
 		// loadData minial interval is 1 second
 		ticker := time.NewTicker(time.Second)
-		mod := false
+		docChange := false
 		rootChange := false
 
 		for {
@@ -93,7 +93,7 @@ func (s *Handler) watch() {
 				switch ext := filepath.Ext(event.Name); ext {
 				case ".md", ".tmpl":
 					log.Println("modified file:", event.Name)
-					mod = true
+					docChange = true
 				case ".swp":
 					continue
 				}
@@ -102,8 +102,8 @@ func (s *Handler) watch() {
 			case err := <-watcher.Errors:
 				log.Println("error:", err)
 			case <-ticker.C:
-				if mod {
-					mod = false
+				if docChange {
+					docChange = false
 					s.loadData()
 					s.loadTemplate()
 				}
@@ -128,7 +128,7 @@ func (s *Handler) watch() {
 	}
 }
 
-func (s *Handler) clearAllTmp(exclude string) (err error) {
+func (s *Handler) clearOldTmp(exclude string) (err error) {
 	realExcluded, err := filepath.Abs(exclude)
 	if err != nil {
 		return err
@@ -228,7 +228,7 @@ func (s *Handler) saveAll() (err error) {
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
 	log.Println("save completed")
 	s.public = http.FileServer(http.Dir(s.publicPath))
-	s.clearAllTmp(s.publicPath)
+	s.clearOldTmp(s.publicPath)
 	return nil
 }
 
