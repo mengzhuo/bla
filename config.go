@@ -1,5 +1,11 @@
 package bla
 
+import (
+	"fmt"
+	"os"
+	"os/user"
+)
+
 type Config struct {
 	BaseURL  string
 	HostName string
@@ -18,17 +24,17 @@ func DefaultConfig() *Config {
 	defaultLinks := []string{
 		"libs", "asset",
 	}
-
+	name := user.Current().Name
 	return &Config{
 		BaseURL:  "",
-		HostName: "meng.zhuo.blog",
+		HostName: os.Hostname(),
 
 		RootPath: "root",
 		LinkPath: defaultLinks,
 
 		HomeDocCount: 5,
-		Title:        "笔记本",
-		UserName:     "admin",
-		Password:     "ha?",
+		Title:        fmt.Sprintf("%s's blog", name),
+		UserName:     name,
+		Password:     "PLEASE_UPDATE_PASSWORD!",
 	}
 }
