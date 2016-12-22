@@ -74,16 +74,24 @@ func (s *Handler) watch() {
 	}
 
 	go func() {
+		// init all docs
+		s.loadData()
+		s.loadTemplate()
+		err := s.saveAll()
+		if err != nil {
+			log.Fatal("can't save docs:", err)
+		}
 		// loadData minial interval is 1 second
-		ticker := time.NewTicker(500 * time.Millisecond)
-		mod := true
-		rootChange := true
+		ticker := time.NewTicker(time.Second)
+		mod := false
+		rootChange := false
 
 		for {
+
 			select {
 			case event := <-watcher.Events:
 				switch ext := filepath.Ext(event.Name); ext {
-				case ".md", ".json", ".tmpl":
+				case ".md", ".tmpl":
 					log.Println("modified file:", event.Name)
 					mod = true
 				case ".swp":
@@ -93,7 +101,6 @@ func (s *Handler) watch() {
 				rootChange = true
 			case err := <-watcher.Errors:
 				log.Println("error:", err)
-				return
 			case <-ticker.C:
 				if mod {
 					mod = false
