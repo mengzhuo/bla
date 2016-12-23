@@ -112,7 +112,8 @@ func (s *Handler) watch() {
 					rootChange = false
 					err := s.saveAll()
 					if err != nil {
-						log.Fatal("can't save docs:", err)
+						log.Print("can't save docs:", err)
+						continue
 					}
 				}
 			}
