@@ -170,7 +170,7 @@ func (s *Handler) saveAll() (err error) {
 	}
 
 	var f *os.File
-	err = os.MkdirAll(s.publicPath, 0755)
+	err = os.MkdirAll(s.publicPath, 0700)
 	if err != nil {
 		return
 	}
@@ -206,7 +206,7 @@ func (s *Handler) saveAll() (err error) {
 	}
 
 	log.Printf("saving all tags...")
-	err = os.MkdirAll(filepath.Join(s.publicPath, "tags"), 0755)
+	err = os.MkdirAll(filepath.Join(s.publicPath, "tags"), 0700)
 	if err != nil {
 		return
 	}
@@ -233,6 +233,7 @@ func (s *Handler) saveAll() (err error) {
 }
 
 func (s *Handler) linkToPublic(path string, info os.FileInfo, err error) error {
+
 	if path == s.Cfg.RootPath {
 		return nil
 	}
