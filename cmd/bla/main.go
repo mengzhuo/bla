@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -19,12 +20,13 @@ const (
 )
 
 var (
-	certfile   = flag.String("cert", "", "cert file path")
-	keyfile    = flag.String("key", "", "cert file path")
-	addr       = flag.String("addr", ":8080", "listen port")
-	configPath = flag.String("config", DefaultConfig, "default config path")
-	logPool    = sync.Pool{New: func() interface{} { return &LogWriter{nil, 200} }}
+	certfile      = flag.String("cert", "", "cert file path")
+	keyfile       = flag.String("key", "", "cert file path")
+	addr          = flag.String("addr", ":8080", "listen port")
+	configPath    = flag.String("config", DefaultConfig, "default config path")
+	accessLogPath = flag.String("accesslog", "", "default access log path")
 
+	logPool = sync.Pool{New: func() interface{} { return &LogWriter{nil, 200} }}
 	tlsCert *tls.Certificate
 	server  *http.Server
 )
@@ -55,7 +57,21 @@ func main() {
 
 func logTimeAndStatus(handler http.Handler) http.Handler {
 
-	accessLogger := log.New(os.Stdout, "", log.LstdFlags)
+	var (
+		writer io.Writer
+		err    error
+	)
+
+	if *accessLogPath != "" {
+		writer, err = os.OpenFile(*accessLogPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		writer = os.Stdout
+	}
+
+	accessLogger := log.New(writer, "", log.LstdFlags)
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

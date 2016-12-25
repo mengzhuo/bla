@@ -21,4 +21,4 @@ Blog/Lite-CMS build on Automatic static file serving
 - [x] access log
 - [ ] service file
 - [ ] sitemap.txt
-- [ ] access log to file
+- [x] access log to file
