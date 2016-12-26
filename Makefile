@@ -19,7 +19,7 @@ pkg:
 	cp bla .tmpBuildRoot/usr/local/bin/
 
 deb: clean build pkg
-	fpm -t deb -s dir -n bla --config-files /etc .tmpBuildRoot
+	fpm -t deb -s dir -n bla  .tmpBuildRoot
 
 rpm: clean build pkg
-	fpm -t rpm -s dir -n bla --config-files /etc .tmpBuildRoot
+	fpm -t rpm -s dir -n bla  .tmpBuildRoot
