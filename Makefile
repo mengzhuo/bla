@@ -19,6 +19,7 @@ pkg:
 	mkdir -p .tmpBuildRoot/etc/systemd/system/
 	mkdir -p .tmpBuildRoot/etc/logrotate.d/
 	mkdir -p .tmpBuildRoot/usr/local/bin/
+	mkdir -p .tmpBuildRoot/var/lob/bla/
 	cp bla .tmpBuildRoot/usr/local/bin/
 
 deb: clean build pkg

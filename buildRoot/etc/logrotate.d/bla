@@ -1,0 +1,8 @@
+/var/log/bla/*.log {
+  rotate 3
+  daily
+  compress
+  delaycompress
+  missingok
+  notifempty
+}
