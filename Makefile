@@ -25,4 +25,4 @@ deb: clean build pkg
 	fpm -t deb -s dir -n bla --config-files /etc .tmpBuildRoot
 
 rpm: clean build pkg
-	fpm -t rpm -s dir -n bla .tmpBuildRoot
+	fpm -t rpm -s dir -n bla --config-files /etc .tmpBuildRoot
