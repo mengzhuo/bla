@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -24,7 +25,8 @@ var (
 	keyfile       = flag.String("key", "", "cert file path")
 	addr          = flag.String("addr", ":8080", "listen port")
 	configPath    = flag.String("config", DefaultConfig, "default config path")
-	accessLogPath = flag.String("accesslog", "", "default access log path")
+	accessLogPath = flag.String("accesslog", "", "access log path, default: stdout")
+	version       = flag.Bool("version", false, "show version")
 
 	logPool = sync.Pool{New: func() interface{} { return &LogWriter{nil, 200} }}
 	tlsCert *tls.Certificate
@@ -34,6 +36,12 @@ var (
 func main() {
 	//defer profile.Start().Stop()
 	flag.Parse()
+
+	if *version {
+		fmt.Println("bla version:", bla.Version)
+		return
+	}
+
 	log.Printf("pid:%d", os.Getpid())
 
 	h := bla.NewHandler(*configPath)
