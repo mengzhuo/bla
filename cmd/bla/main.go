@@ -45,7 +45,9 @@ func main() {
 
 	if *certfile != "" && *keyfile != "" {
 
-		server.TLSConfig = &tls.Config{}
+		server.TLSConfig = &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		}
 		server.TLSConfig.GetCertificate = getCertificate
 		log.Printf("TLS:%s, %s", *certfile, *keyfile)
 		watchReloadCert()
