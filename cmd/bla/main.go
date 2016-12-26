@@ -32,7 +32,7 @@ var (
 )
 
 func main() {
-
+	//defer profile.Start().Stop()
 	flag.Parse()
 	log.Printf("pid:%d", os.Getpid())
 
