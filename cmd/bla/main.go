@@ -46,8 +46,9 @@ func main() {
 	if *certfile != "" && *keyfile != "" {
 
 		server.TLSConfig = &tls.Config{
-			MinVersion:       tls.VersionTLS12,
-			CurvePreferences: []tls.CurveID{tls.CurveP384, tls.CurveP256, tls.CurveP521},
+			MinVersion:               tls.VersionTLS12,
+			CurvePreferences:         []tls.CurveID{tls.CurveP384, tls.CurveP256, tls.CurveP521},
+			PreferServerCipherSuites: true,
 		}
 		server.TLSConfig.GetCertificate = getCertificate
 		log.Printf("TLS:%s, %s", *certfile, *keyfile)
