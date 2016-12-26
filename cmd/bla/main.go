@@ -80,6 +80,10 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 		writer.ResponseWriter = w
 		writer.statusCode = 200
 
+		if *certfile != "" {
+			writer.ResponseWriter.Header().Add("Strict-Transport-Security", "max-age=31536000")
+		}
+
 		handler.ServeHTTP(writer, r)
 		accessLogger.Printf("%s %s %s %s %d",
 			r.RemoteAddr, r.Method, r.URL.Path,
