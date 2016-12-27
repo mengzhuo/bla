@@ -114,7 +114,7 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 			r.RemoteAddr, r.Method, r.URL.Path,
 			delta, writer.statusCode)
 
-		httpRequestDurationMicroseconds.Observe(float64(delta.Nanoseconds() * 1000000))
+		httpRequestDurationSeconds.Observe(delta.Seconds())
 		httpRequestCount.Inc()
 
 		logPool.Put(writer)
@@ -178,7 +178,7 @@ func init() {
 func loadMetric(addr string) {
 
 	prometheus.MustRegister(httpRequestCount)
-	prometheus.MustRegister(httpRequestDurationMicroseconds)
+	prometheus.MustRegister(httpRequestDurationSeconds)
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(addr, nil)
 }
@@ -190,11 +190,11 @@ var (
 		Name:      "requests_count",
 		Help:      "The total number of http request",
 	})
-	httpRequestDurationMicroseconds = prometheus.NewSummary(
+	httpRequestDurationSeconds = prometheus.NewSummary(
 		prometheus.SummaryOpts{
 			Namespace: "http",
 			Subsystem: "request",
-			Name:      "duration_microseconds",
+			Name:      "duration_seconds",
 			Help:      "The request duration distribution",
 		})
 )
