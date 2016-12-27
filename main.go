@@ -245,7 +245,7 @@ func (s *Handler) linkToPublic(path string, info os.FileInfo, err error) error {
 	}
 
 	switch base := filepath.Base(path); base {
-	case "template", "docs", ".public", "":
+	case "template", "docs", ".public", "certs":
 		return nil
 	default:
 		realPath, err := filepath.Abs(path)
