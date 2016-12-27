@@ -6,7 +6,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/root/bin/bla -addr :443 -config /root/blog/config.json -cert /root/blog/certs/fullchain.cer  -key /root/blog/certs/zhuo.blog.key  -accesslog /root/blog/access.log
+ExecStart=/usr/local/bin/bla -config /etc/bla/config.json -accesslog /var/log/bla/access.log
 Restart=on-failure
 RestartSec=3
 
