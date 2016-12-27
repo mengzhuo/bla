@@ -1,0 +1,40 @@
+body{color:#222;margin:0;padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height: 1.3em;}
+a {color:#375EAB;text-decoration:none;}
+a:hover {text-decoration: underline; }
+#topbar {background-color:rgb(224, 235, 245);padding:0.5em 0;text-align:center;min-width:385px;}
+#topbar:after {content:"";display:block;clear:both;}
+#topbar h1{margin:0.5em 0;font-size:1.5em;max-width:950px;text-align:left;float:left;}
+#topbar a{color:#222;}
+#topbar form{float:right;margin: 0.5em 0;}
+#topbar .menu {float:right;}
+#topbar .menu a{ padding: 5px 10px; float: left; margin: 0.5em; background: #375eab; color: #fff; border-radius: 5px; }
+#topbar .menu a:hover {text-decoration:none; box-shadow: 1px 1px 5px #111;}
+#topbar input{padding: 0.5em; border:#ccc 1px solid; border-radius: 4px;}
+.container{padding:0 1.5em;margin:0 auto;text-align:left;max-width:950px;}
+.container:after{content:"";display:block;clear:both;}
+article {text-align:left;border-bottom:1px solid #ddd;}
+p {word-wrap:break-word;max-width:800px;}
+ul {max-width:800px;}
+#sidebar { float: right; padding-left: 20px; width: 40%; max-width: 250px; background: #F3F3F3; margin: 20px 0 20px 20px; text-align:left; }
+#sidebar ul { padding: 0; }
+#sidebar li { list-style-type: none; }
+#site-footer {margin:3em 0 0;text-align:center;color:#666;}
+#site-footer p {max-width:100%;}
+.title {font-size:1.5em;margin:1em 0 0em;line-height:1em;}
+.editor {min-height:300px;padding-top:5px;}
+.editor .tag{border-bottom:1px dashed #444;}
+time {color:#888;font-size:0.6em;}
+.submit {padding:0.3em 0.5em;}
+pre, code {font-family:Consolas, 'Liberation Mono', Menlo, Courier, monospace;font-size:0.8em;}
+pre {background: #EFEFEF; padding: 10px; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; overflow:auto;}
+img {max-width:95% !important; height:auto;}
+blockquote {border-left:2px dashed #ccc;padding-left:1em;margin-left:1em;}
+h2,h3,h4 {color:#375EAB;}
+.related_header { font-size: 20px; background: #E0EBF5; padding: 8px; line-height: 1.25; font-weight: normal; }
+.tag-row {margin-top:10px;}
+.tag-row a {padding:3px 5px;border:1px solid #666;border-radius:5px;}
+@media screen and (max-width:624px){ 
+    #topbar {position: fixed; width: 100%; top: 0; box-shadow: 0 2px 5px #ccc;padding:0;}
+    #articles {margin-top:4em;}
+}
+@media screen and (max-width:385px){#topbar form {display:none;}}
