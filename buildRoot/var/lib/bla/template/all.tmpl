@@ -1,0 +1,15 @@
+{{ define "all" }}
+{{ template "header" . }}	
+<ul>
+{{ range .Docs }}
+	<li>
+		<h3><a href="{{.SlugTitle}}">{{.Title}}</a></h3>
+		{{ range $name, $docs := .Tags }}
+			<a href="/tags/$name">{{$name}}</a>|
+		{{end}}
+	</li>
+
+{{ end }}
+</ul>
+{{ template "footer" }}
+{{end}}

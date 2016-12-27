@@ -213,6 +213,17 @@ func (s *Handler) saveAll() (err error) {
 		return
 	}
 
+	f, err = os.Create(filepath.Join(s.publicPath, "all"))
+	if err != nil {
+		return
+	}
+	defer f.Close()
+
+	if err = s.tpl.ExecuteTemplate(f, "all",
+		&mulDocData{s, "", s.sortDocs}); err != nil {
+		return
+	}
+
 	for tagName, docs := range s.tags {
 		f, err = os.Create(filepath.Join(s.publicPath, "/tags/", tagName))
 		if err != nil {
