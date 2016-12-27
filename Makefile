@@ -28,7 +28,7 @@ pkg:
 	cp bla ${DESTDIR}/usr/local/bin/
 
 deb: clean build pkg
-	fpm -t deb -s dir -n bla  -C ${DESTDIR}
+	fpm -t deb -s dir -n bla -v $(VERSION:v%=%) -C ${DESTDIR}
 
 rpm: clean build pkg
-	fpm -t rpm -s dir -n bla  -C ${DESTDIR}
+	fpm -t rpm -s dir -n bla -v ${VERSION} -C ${DESTDIR} 
