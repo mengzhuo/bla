@@ -1,0 +1,13 @@
+{{ define "tag_page" }}
+{{ template "header" . }}	
+<footer>
+	<div class="tag-row">
+        <h2>Tags: {{ .Title }}</h2>
+        <hr/>
+		{{ range .Docs }}
+            {{ template "doc" . }}
+		{{end}}
+	</div>
+</footer>
+{{ template "footer" }}
+{{end}}
