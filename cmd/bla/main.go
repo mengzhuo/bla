@@ -31,6 +31,7 @@ var (
 	logPool = sync.Pool{New: func() interface{} { return &LogWriter{nil, 200} }}
 	tlsCert *tls.Certificate
 	server  *http.Server
+	Version string = "dev"
 )
 
 func main() {
@@ -38,7 +39,7 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println("bla version:", bla.Version)
+		fmt.Println("bla version:", Version)
 		return
 	}
 

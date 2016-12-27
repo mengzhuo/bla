@@ -1,4 +1,4 @@
-VERSION ?= dev
+VERSION := $(shell git describe --tags)
 
 .PHONY: binary
 binary: clean version build
@@ -10,15 +10,11 @@ clean:
 	rm -rf bla
 	rm -rf .tmpBuildRoot
 
-.PHONY: version
-version:
-	sed -i .bak -e 's/dev/${VERSION}/g' version.go
-
 .PHONY: build
 build:
 	mkdir -p src/github.com/mengzhuo
 	@-ln -s ${PWD} ${PWD}/src/github.com/mengzhuo/bla && ([ $$? -eq 0 ] )
-	go build -o bla cmd/bla/main.go
+	go build -o bla -ldflags '-X main.Version=${VERSION}' cmd/bla/main.go
 
 .PHONY: pkg
 pkg:
