@@ -58,7 +58,7 @@ func main() {
 	server = &http.Server{Addr: cfg.Listen, Handler: lh}
 
 	if cfg.Certfile != "" && cfg.Keyfile != "" {
-
+		// for higher score in ssllab
 		server.TLSConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
 			CurvePreferences:         []tls.CurveID{tls.CurveP384, tls.CurveP256, tls.CurveP521},
@@ -144,4 +144,17 @@ func watchReloadCert() {
 
 func getCertificate(ch *tls.ClientHelloInfo) (cert *tls.Certificate, err error) {
 	return tlsCert, nil
+}
+
+var cfg *ServerConfig
+
+type ServerConfig struct {
+	Certfile      string
+	Keyfile       string
+	Listen        string
+	AccessLogPath string
+}
+
+func init() {
+	cfg = &ServerConfig{"", "", ":8080", "access.log"}
 }
