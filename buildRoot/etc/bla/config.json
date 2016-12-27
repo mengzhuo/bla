@@ -1,3 +1,4 @@
 {
-	"LinkPath":["/var/lib/bla/libs"]
+	"LinkPath":["/var/lib/bla/libs"],
+	"DocPath": "/var/lib/bla/docs"
 }
