@@ -30,7 +30,6 @@ src/github.com
 root/docs
 root/asset
 root/.public
-access.log
 *.rpm
 *.deb
 bla
