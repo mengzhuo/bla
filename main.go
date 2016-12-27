@@ -1,7 +1,6 @@
 package bla
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,6 +12,8 @@ import (
 	"sync"
 	"text/template"
 	"time"
+
+	ini "gopkg.in/ini.v1"
 
 	"golang.org/x/net/webdav"
 
@@ -327,20 +328,15 @@ func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
 
 func (h *Handler) loadConfig() {
 
-	f, err := os.Open(h.cfgPath)
-	if err != nil && os.IsExist(err) {
-		log.Panic(err)
+	rawCfg, err := ini.Load(h.cfgPath)
+	if err != nil {
+		log.Fatal(err)
 	}
-	defer f.Close()
 
 	log.Print("loading config")
 	cfg := DefaultConfig()
-	dec := json.NewDecoder(f)
-	err = dec.Decode(cfg)
 
-	if err != nil {
-		log.Panic(err)
-	}
+	rawCfg.MapTo(cfg)
 
 	h.templatePath = filepath.Join(cfg.RootPath, "template")
 	h.docPath = filepath.Join(cfg.RootPath, "docs")

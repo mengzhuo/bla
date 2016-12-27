@@ -13,20 +13,18 @@ import (
 	"syscall"
 	"time"
 
+	ini "gopkg.in/ini.v1"
+
 	"github.com/mengzhuo/bla"
 )
 
 const (
-	DefaultConfig = "config.json"
+	DefaultConfig = "config.ini"
 )
 
 var (
-	certfile      = flag.String("cert", "", "cert file path")
-	keyfile       = flag.String("key", "", "cert file path")
-	addr          = flag.String("addr", ":8080", "listen port")
-	configPath    = flag.String("config", DefaultConfig, "default config path")
-	accessLogPath = flag.String("accesslog", "", "access log path, default: stdout")
-	version       = flag.Bool("version", false, "show version")
+	configPath = flag.String("config", DefaultConfig, "default config path")
+	version    = flag.Bool("version", false, "show version")
 
 	logPool = sync.Pool{New: func() interface{} { return &LogWriter{nil, 200} }}
 	tlsCert *tls.Certificate
@@ -43,16 +41,23 @@ func main() {
 		return
 	}
 
+	raw, err := ini.Load(*configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	raw.MapTo(cfg)
+
 	log.Printf("pid:%d", os.Getpid())
 
+	log.Printf("Server:%v", cfg)
+
 	h := bla.NewHandler(*configPath)
-	log.Print("addr: ", *addr)
-	log.Print("cfg: ", *configPath)
 
 	lh := logTimeAndStatus(h)
-	server = &http.Server{Addr: *addr, Handler: lh}
+	server = &http.Server{Addr: cfg.Listen, Handler: lh}
 
-	if *certfile != "" && *keyfile != "" {
+	if cfg.Certfile != "" && cfg.Keyfile != "" {
 
 		server.TLSConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
@@ -60,9 +65,9 @@ func main() {
 			PreferServerCipherSuites: true,
 		}
 		server.TLSConfig.GetCertificate = getCertificate
-		log.Printf("TLS:%s, %s", *certfile, *keyfile)
+		log.Printf("TLS:%s, %s", cfg.Certfile, cfg.Keyfile)
 		watchReloadCert()
-		log.Fatal(server.ListenAndServeTLS(*certfile, *keyfile))
+		log.Fatal(server.ListenAndServeTLS(cfg.Certfile, cfg.Keyfile))
 	}
 	server.ListenAndServe()
 
@@ -75,8 +80,8 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 		err    error
 	)
 
-	if *accessLogPath != "" {
-		writer, err = os.OpenFile(*accessLogPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+	if cfg.AccessLogPath != "" {
+		writer, err = os.OpenFile(cfg.AccessLogPath, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -93,7 +98,7 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 		writer.ResponseWriter = w
 		writer.statusCode = 200
 
-		if *certfile != "" {
+		if cfg.Certfile != "" {
 			writer.ResponseWriter.Header().Add("Strict-Transport-Security", "max-age=31536000")
 		}
 
@@ -118,7 +123,7 @@ func (l *LogWriter) WriteHeader(i int) {
 func loadCertificate() {
 
 	log.Println("Loading new certs")
-	cert, err := tls.LoadX509KeyPair(*certfile, *keyfile)
+	cert, err := tls.LoadX509KeyPair(cfg.Certfile, cfg.Keyfile)
 	if err != nil {
 		log.Println("load cert failed keep old", err)
 		return
