@@ -17,6 +17,6 @@ Blog/Lite-CMS build on Automatic static file serving
 - [ ] RPM/Deb pack
 - [ ] default doc generate
 - [ ] expvar
-- [ ] service file
+- [x] service file
 - [ ] sitemap.txt
 - [ ] detail document
