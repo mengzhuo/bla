@@ -16,6 +16,8 @@ import (
 	ini "gopkg.in/ini.v1"
 
 	"github.com/mengzhuo/bla"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
@@ -49,6 +51,10 @@ func main() {
 	raw.MapTo(cfg)
 
 	log.Printf("pid:%d", os.Getpid())
+
+	if cfg.MetricListen != "" {
+		go loadMetric(cfg.MetricListen)
+	}
 
 	log.Printf("Server:%v", cfg)
 
@@ -101,11 +107,16 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 		if cfg.Certfile != "" {
 			writer.ResponseWriter.Header().Add("Strict-Transport-Security", "max-age=31536000")
 		}
-
 		handler.ServeHTTP(writer, r)
+
+		delta := time.Now().Sub(start)
 		accessLogger.Printf("%s %s %s %s %d",
 			r.RemoteAddr, r.Method, r.URL.Path,
-			time.Now().Sub(start), writer.statusCode)
+			delta, writer.statusCode)
+
+		httpRequestDurationMicroseconds.Observe(float64(delta.Nanoseconds() * 1000000))
+		httpRequestCount.Inc()
+
 		logPool.Put(writer)
 	})
 }
@@ -146,15 +157,44 @@ func getCertificate(ch *tls.ClientHelloInfo) (cert *tls.Certificate, err error) 
 	return tlsCert, nil
 }
 
+// Config ---------------------
+
 var cfg *ServerConfig
 
 type ServerConfig struct {
 	Certfile      string
 	Keyfile       string
 	Listen        string
+	MetricListen  string
 	AccessLogPath string
 }
 
 func init() {
-	cfg = &ServerConfig{"", "", ":8080", "access.log"}
+	cfg = &ServerConfig{
+		"", "", ":8080",
+		"access.log", ""}
 }
+
+func loadMetric(addr string) {
+
+	prometheus.MustRegister(httpRequestCount)
+	prometheus.MustRegister(httpRequestDurationMicroseconds)
+	http.Handle("/metrics", promhttp.Handler())
+	http.ListenAndServe(addr, nil)
+}
+
+var (
+	httpRequestCount = prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: "http",
+		Subsystem: "request",
+		Name:      "requests_count",
+		Help:      "The total number of http request",
+	})
+	httpRequestDurationMicroseconds = prometheus.NewSummary(
+		prometheus.SummaryOpts{
+			Namespace: "http",
+			Subsystem: "request",
+			Name:      "duration_microseconds",
+			Help:      "The request duration distribution",
+		})
+)
