@@ -4,8 +4,8 @@
 {{ range .Docs }}
 	<li>
 		<h3><a href="{{.SlugTitle}}">{{.Title}}</a></h3>
-		{{ range $name, $docs := .Tags }}
-			<a href="/tags/$name">{{$name}}</a>|
+		{{ range .Tags }}
+			<a href="/tags/{{.}}">{{.}}</a>|
 		{{end}}
 	</li>
 
