@@ -1,8 +1,10 @@
 /var/log/bla/*.log {
-  rotate 3
+  rotate 365
+  dateext
   daily
-  compress
   delaycompress
   missingok
   notifempty
+
+  compressoptions -9
 }
