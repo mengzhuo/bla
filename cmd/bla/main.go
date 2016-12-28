@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"crypto/tls"
 	"flag"
 	"fmt"
@@ -89,11 +88,11 @@ func logTimeAndStatus(handler http.Handler) http.Handler {
 	if cfg.AccessLogPath != "" {
 		var file *os.File
 		file, err = os.OpenFile(cfg.AccessLogPath,
-			os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0600)
+			os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
-		writer = bufio.NewWriter(file)
+		writer = file
 		log.Printf("Access Log to file: %s", cfg.AccessLogPath)
 	} else {
 		writer = os.Stdout
