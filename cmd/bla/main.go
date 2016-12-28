@@ -36,7 +36,7 @@ var (
 )
 
 func main() {
-	//defer profile.Start().Stop()
+	// defer profile.Start().Stop()
 	flag.Parse()
 
 	if *version {
@@ -68,7 +68,6 @@ func main() {
 		// for higher score in ssllab
 		server.TLSConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
-			CurvePreferences:         []tls.CurveID{tls.CurveP384, tls.CurveP256, tls.CurveP521},
 			PreferServerCipherSuites: true,
 		}
 		server.TLSConfig.GetCertificate = getCertificate
