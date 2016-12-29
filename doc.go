@@ -5,6 +5,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
+	"os"
+	"path"
+	"path/filepath"
 	"time"
 
 	"github.com/russross/blackfriday"
@@ -49,6 +53,43 @@ func newDoc(r io.Reader) (d *Doc, err error) {
 
 	d.Content = string(blackfriday.MarkdownCommon(buf[idx+4:]))
 	return
+}
+
+func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	start := time.Now()
+	if info.IsDir() || filepath.Ext(info.Name()) != ".md" {
+		return nil
+	}
+	var f *os.File
+	f, err = os.Open(p)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	var doc *Doc
+	doc, err = newDoc(f)
+	if err != nil {
+		return err
+	}
+	if !doc.Public {
+		log.Printf("doc:%s loaded but not public", p)
+		return nil
+	}
+
+	doc.SlugTitle = path.Base(p)[0 : len(path.Base(p))-3]
+
+	for _, t := range doc.Tags {
+		s.tags[t] = append(s.tags[t], doc)
+	}
+	s.docs[doc.SlugTitle] = doc
+	s.sortDocs = append(s.sortDocs, doc)
+	log.Printf("loaded doc:%s in %s", doc.SlugTitle,
+		time.Now().Sub(start).String())
+	return nil
 }
 
 type docsByTime []*Doc

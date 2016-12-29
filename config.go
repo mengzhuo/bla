@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -45,4 +47,27 @@ func DefaultConfig() *Config {
 		UserName:     name,
 		Password:     "PLEASE_UPDATE_PASSWORD!",
 	}
+}
+
+func loadData(s *Handler) {
+	log.Print("Loading docs from:", s.docPath)
+
+	s.mu.Lock()
+	s.sortDocs = []*Doc{}
+	s.docs = map[string]*Doc{}
+	s.tags = map[string][]*Doc{}
+	s.mu.Unlock()
+
+	f, err := os.Open(s.docPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	err = filepath.Walk(s.docPath, s.docWalker)
+	if err != nil {
+		log.Print(err)
+	}
+	sort.Sort(docsByTime(s.sortDocs))
+	log.Print("End Loading docs from:", s.docPath)
 }

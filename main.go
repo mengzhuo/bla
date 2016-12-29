@@ -1,16 +1,14 @@
 package bla
 
 import (
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
-	"text/template"
 	"time"
 
 	ini "gopkg.in/ini.v1"
@@ -43,7 +41,7 @@ func NewHandler(cfgPath string) *Handler {
 		mu:      sync.RWMutex{},
 	}
 
-	h.loadConfig()
+	loadConfig(h)
 	h.watch()
 	loadWebDav(h)
 
@@ -61,7 +59,7 @@ func (s *Handler) watch() {
 		// init all docs
 		loadData(s)
 		loadTemplate(s)
-		err := s.saveAll()
+		err := saveAll(s)
 		if err != nil {
 			log.Fatal("can't save docs:", err)
 		}
@@ -94,7 +92,7 @@ func (s *Handler) watch() {
 
 				if rootChange {
 					rootChange = false
-					err := s.saveAll()
+					err := saveAll(s)
 					if err != nil {
 						log.Print("can't save docs:", err)
 						continue
@@ -139,7 +137,7 @@ func clearOldTmp(exclude string) (err error) {
 
 type handleFunc func(s *Handler) error
 
-func (s *Handler) saveAll() (err error) {
+func saveAll(s *Handler) (err error) {
 
 	s.publicPath, err = ioutil.TempDir("", "bla")
 	if err != nil {
@@ -177,67 +175,7 @@ func (s *Handler) saveAll() (err error) {
 	return nil
 }
 
-func loadData(s *Handler) {
-	log.Print("Loading docs from:", s.docPath)
-
-	s.mu.Lock()
-	s.sortDocs = []*Doc{}
-	s.docs = map[string]*Doc{}
-	s.tags = map[string][]*Doc{}
-	s.mu.Unlock()
-
-	f, err := os.Open(s.docPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-
-	err = filepath.Walk(s.docPath, s.docWalker)
-	if err != nil {
-		log.Print(err)
-	}
-	sort.Sort(docsByTime(s.sortDocs))
-	log.Print("End Loading docs from:", s.docPath)
-}
-
-func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	start := time.Now()
-	if info.IsDir() || filepath.Ext(info.Name()) != ".md" {
-		return nil
-	}
-	var f *os.File
-	f, err = os.Open(p)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	var doc *Doc
-	doc, err = newDoc(f)
-	if err != nil {
-		return err
-	}
-	if !doc.Public {
-		log.Printf("doc:%s loaded but not public", p)
-		return nil
-	}
-
-	doc.SlugTitle = path.Base(p)[0 : len(path.Base(p))-3]
-
-	for _, t := range doc.Tags {
-		s.tags[t] = append(s.tags[t], doc)
-	}
-	s.docs[doc.SlugTitle] = doc
-	s.sortDocs = append(s.sortDocs, doc)
-	log.Printf("loaded doc:%s in %s", doc.SlugTitle,
-		time.Now().Sub(start).String())
-	return nil
-}
-
-func (h *Handler) loadConfig() {
+func loadConfig(h *Handler) {
 
 	rawCfg, err := ini.Load(h.cfgPath)
 	if err != nil {
@@ -264,17 +202,4 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else {
 		s.public.ServeHTTP(w, r)
 	}
-}
-
-func loadTemplate(s *Handler) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	log.Printf("loding template:%s", s.templatePath)
-	tpl, err := template.ParseGlob(s.templatePath + "/*.tmpl")
-	if err != nil {
-		log.Print(err)
-		return
-	}
-	s.tpl = tpl
 }
