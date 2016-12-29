@@ -13,7 +13,7 @@ func generateSiteMap(h *Handler) (err error) {
 
 	buf := bytes.NewBuffer(nil)
 	for _, d := range h.sortDocs {
-		fmt.Fprintf(buf, "%s%s/%s", "https://", h.Cfg.HostName,
+		fmt.Fprintf(buf, "%s%s/%s\n", "https://", h.Cfg.HostName,
 			path.Join(h.Cfg.BaseURL, d.SlugTitle))
 	}
 
