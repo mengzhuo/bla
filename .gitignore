@@ -1,5 +1,4 @@
 *.swp
 .tmpBuildRoot
 pkg
-src
 vendor/.cache

@@ -15,7 +15,8 @@ import (
 
 	ini "gopkg.in/ini.v1"
 
-	"github.com/mengzhuo/bla"
+	"bla"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
