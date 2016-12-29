@@ -240,6 +240,8 @@ func (s *Handler) saveAll() (err error) {
 	log.Printf("linking all dir in %s", s.Cfg.RootPath)
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
 	log.Println("save completed")
+
+	s.generateSiteMap()
 	s.public = http.FileServer(http.Dir(s.publicPath))
 	s.clearOldTmp(s.publicPath)
 	return nil
