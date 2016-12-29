@@ -1,4 +1,4 @@
-package main
+package bla
 
 import (
 	"crypto/tls"
@@ -14,8 +14,6 @@ import (
 	"time"
 
 	ini "gopkg.in/ini.v1"
-
-	"bla"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -59,7 +57,7 @@ func main() {
 
 	log.Printf("Server:%v", cfg)
 
-	h := bla.NewHandler(*configPath)
+	h := NewHandler(*configPath)
 
 	lh := logTimeAndStatus(h)
 	server = &http.Server{Addr: cfg.Listen, Handler: lh}
