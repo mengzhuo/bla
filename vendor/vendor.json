@@ -1,6 +1,21 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"package": [],
+	"package": [
+		{
+			"checksumSHA1": "olBUAoUXwntKyblqT7VE1zvINBo=",
+			"path": "github.com/fsnotify/fsnotify",
+			"revision": "629574ca2a5df945712d3079857300b5e4da0236",
+			"revisionTime": "2016-10-11T02:33:12Z",
+			"version": "v1",
+			"versionExact": "v1.4.2"
+		},
+		{
+			"checksumSHA1": "uTQtOqR0ePMMcvuvAIksiIZxhqU=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "d75a52659825e75fff6158388dddc6a5b04f9ba5",
+			"revisionTime": "2016-12-14T18:38:57Z"
+		}
+	],
 	"rootPath": "github.com/mengzhuo/bla"
 }
