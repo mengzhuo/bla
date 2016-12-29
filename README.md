@@ -14,9 +14,9 @@ Blog/Lite-CMS build on Automatic static file serving
 ## TODO
 
 - [ ] HTTP jump to HTTPs
-- [ ] RPM/Deb pack
+- [x] RPM/Deb pack
 - [ ] default doc generate
-- [ ] expvar
+- [x] expvar
 - [x] service file
 - [ ] sitemap.txt
 - [ ] detail document
