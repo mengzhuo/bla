@@ -11,8 +11,6 @@ import (
 	"text/template"
 	"time"
 
-	ini "gopkg.in/ini.v1"
-
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -156,7 +154,9 @@ func saveAll(s *Handler) (err error) {
 		"index":    generateIndex,
 		"all page": generateAllPage,
 		"sitemap":  generateSiteMap,
-		"tag":      generateTagPage} {
+		"tag":      generateTagPage,
+		"docs":     generateSingle,
+	} {
 
 		err = function(s)
 		if err != nil {
@@ -173,26 +173,6 @@ func saveAll(s *Handler) (err error) {
 	s.public = http.FileServer(http.Dir(s.publicPath))
 	clearOldTmp(s.publicPath)
 	return nil
-}
-
-func loadConfig(h *Handler) {
-
-	rawCfg, err := ini.Load(h.cfgPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Print("loading config")
-	cfg := DefaultConfig()
-
-	rawCfg.MapTo(cfg)
-
-	h.templatePath = filepath.Join(cfg.RootPath, "template")
-	h.docPath = filepath.Join(cfg.RootPath, "docs")
-
-	h.Cfg = cfg
-	log.Printf("%#v", *cfg)
-
 }
 
 func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

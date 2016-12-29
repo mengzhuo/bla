@@ -5,7 +5,10 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
+
+	ini "gopkg.in/ini.v1"
 )
 
 type Config struct {
@@ -45,4 +48,24 @@ func DefaultConfig() *Config {
 		UserName:     name,
 		Password:     "PLEASE_UPDATE_PASSWORD!",
 	}
+}
+
+func loadConfig(h *Handler) {
+
+	rawCfg, err := ini.Load(h.cfgPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Print("loading config")
+	cfg := DefaultConfig()
+
+	rawCfg.MapTo(cfg)
+
+	h.templatePath = filepath.Join(cfg.RootPath, "template")
+	h.docPath = filepath.Join(cfg.RootPath, "docs")
+
+	h.Cfg = cfg
+	log.Printf("%#v", *cfg)
+
 }

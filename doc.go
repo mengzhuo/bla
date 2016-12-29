@@ -56,6 +56,23 @@ func newDoc(r io.Reader) (d *Doc, err error) {
 	return
 }
 
+func generateSingle(s *Handler) (err error) {
+
+	for slugTitle, doc := range s.docs {
+		f, err := os.Create(filepath.Join(s.publicPath, slugTitle))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		err = s.tpl.ExecuteTemplate(f, "single", &singleData{s, doc.Title, doc})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func loadData(s *Handler) {
 	log.Print("Loading docs from:", s.docPath)
 
