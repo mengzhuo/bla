@@ -130,7 +130,7 @@ func (s *Handler) watch() {
 	}
 }
 
-func (s *Handler) clearOldTmp(exclude string) (err error) {
+func clearOldTmp(exclude string) (err error) {
 	realExcluded, err := filepath.Abs(exclude)
 	if err != nil {
 		return err
@@ -231,7 +231,7 @@ func (s *Handler) saveAll() (err error) {
 	generateTagPage(s)
 	generateSiteMap(s)
 	s.public = http.FileServer(http.Dir(s.publicPath))
-	s.clearOldTmp(s.publicPath)
+	clearOldTmp(s.publicPath)
 	return nil
 }
 
