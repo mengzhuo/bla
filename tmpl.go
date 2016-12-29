@@ -1,8 +1,8 @@
 package bla
 
 import (
-	"html/template"
 	"log"
+	"text/template"
 )
 
 func loadTemplate(s *Handler) {

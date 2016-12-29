@@ -1,7 +1,6 @@
 package bla
 
 import (
-	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"text/template"
 	"time"
 
 	ini "gopkg.in/ini.v1"
