@@ -2,3 +2,4 @@
 .tmpBuildRoot
 pkg
 src
+vendor/.cache
