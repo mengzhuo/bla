@@ -11,10 +11,31 @@
 			"versionExact": "v1.4.2"
 		},
 		{
+			"checksumSHA1": "1vBxRCnvy3GxfVUrpAN5+NlQ2QM=",
+			"path": "github.com/prometheus/client_golang",
+			"revision": "c5b7fccd204277076155f10851dad72b76a49317",
+			"revisionTime": "2016-08-17T15:48:24Z",
+			"version": "v0.8",
+			"versionExact": "v0.8.0"
+		},
+		{
+			"path": "github.com/prometheus/client_golang/prometheus",
+			"revision": "v1",
+			"version": "v1"
+		},
+		{
 			"checksumSHA1": "uTQtOqR0ePMMcvuvAIksiIZxhqU=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "d75a52659825e75fff6158388dddc6a5b04f9ba5",
 			"revisionTime": "2016-12-14T18:38:57Z"
+		},
+		{
+			"checksumSHA1": "Nd6DRcLwZripAErJPfgW+Yf0Moc=",
+			"path": "gopkg.in/ini.v1",
+			"revision": "6f66b0e091edb3c7b380f7c4f0f884274d550b67",
+			"revisionTime": "2016-12-21T12:03:40Z",
+			"version": "v1",
+			"versionExact": "v1.23.0"
 		}
 	],
 	"rootPath": "github.com/mengzhuo/bla"
