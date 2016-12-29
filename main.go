@@ -138,7 +138,8 @@ type handleFunc func(s *Handler) error
 
 func saveAll(s *Handler) (err error) {
 
-	s.publicPath, err = ioutil.TempDir("", fmt.Sprintf("bla_%s_", s.Cfg.UserName))
+	var newPub string
+	newPub, err = ioutil.TempDir("", fmt.Sprintf("bla_%s_", s.Cfg.UserName))
 	if err != nil {
 		return err
 	}
@@ -164,6 +165,7 @@ func saveAll(s *Handler) (err error) {
 
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
 
+	s.publicPath = newPub
 	s.public = http.FileServer(http.Dir(s.publicPath))
 	clearOldTmp(s.publicPath)
 	return nil
