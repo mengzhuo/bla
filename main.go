@@ -1,6 +1,7 @@
 package bla
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -114,7 +115,7 @@ func clearOldTmp(exclude string) (err error) {
 	if err != nil {
 		return err
 	}
-	old, err := filepath.Glob(filepath.Join(os.TempDir(), "bla*"))
+	old, err := filepath.Glob(filepath.Join(os.TempDir(), "bla_*"))
 	if err != nil {
 		return err
 	}
@@ -137,38 +138,31 @@ type handleFunc func(s *Handler) error
 
 func saveAll(s *Handler) (err error) {
 
-	s.publicPath, err = ioutil.TempDir("", "bla")
+	s.publicPath, err = ioutil.TempDir("", fmt.Sprintf("bla_%s_", s.Cfg.UserName))
 	if err != nil {
 		return err
 	}
-
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	err = os.MkdirAll(s.publicPath, 0700)
-	if err != nil {
-		return
-	}
-
 	for k, function := range map[string]handleFunc{
 		"index":    generateIndex,
-		"all page": generateAllPage,
+		"all_page": generateAllPage,
 		"sitemap":  generateSiteMap,
 		"tag":      generateTagPage,
 		"docs":     generateSingle,
 	} {
-
+		start := time.Now()
 		err = function(s)
+		cost := time.Now().Sub(start)
 		if err != nil {
 			log.Printf("generate:%-15s ... [ERR]", k)
 			return err
 		}
-		log.Printf("generate:%-15s ... [OK]", k)
+		log.Printf("generate:%-15s ... [OK][%s]", k, cost)
 	}
 
-	log.Printf("linking all dir in %s", s.Cfg.RootPath)
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
-	log.Println("save completed")
 
 	s.public = http.FileServer(http.Dir(s.publicPath))
 	clearOldTmp(s.publicPath)
