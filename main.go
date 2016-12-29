@@ -227,42 +227,11 @@ func (s *Handler) saveAll() (err error) {
 	log.Printf("linking all dir in %s", s.Cfg.RootPath)
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
 	log.Println("save completed")
+
 	generateTagPage(s)
 	generateSiteMap(s)
 	s.public = http.FileServer(http.Dir(s.publicPath))
 	s.clearOldTmp(s.publicPath)
-	return nil
-}
-
-func (s *Handler) linkToPublic(path string, info os.FileInfo, err error) error {
-
-	if path == s.Cfg.RootPath {
-		return nil
-	}
-
-	if strings.Count(path, "/")-strings.Count(s.Cfg.RootPath, "/") > 1 {
-		return nil
-	}
-
-	switch base := filepath.Base(path); base {
-	case "template", "docs", ".public", "certs":
-		return nil
-	default:
-		realPath, err := filepath.Abs(path)
-		if err != nil {
-			return err
-		}
-		target := filepath.Join(s.publicPath, base)
-		log.Printf("link %s -> %s", realPath, target)
-
-		err = os.Symlink(realPath, target)
-		if err != nil {
-			if os.IsExist(err) {
-				return nil
-			}
-			log.Fatal(err)
-		}
-	}
 	return nil
 }
 
