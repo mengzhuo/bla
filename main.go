@@ -224,24 +224,11 @@ func (s *Handler) saveAll() (err error) {
 		return
 	}
 
-	for tagName, docs := range s.tags {
-		f, err = os.Create(filepath.Join(s.publicPath, "/tags/", tagName))
-		if err != nil {
-			return
-		}
-		sort.Sort(docsByTime(docs))
-		if err = s.tpl.ExecuteTemplate(f, "tag_page",
-			&tagData{s, tagName, docs, tagName}); err != nil {
-			return
-		}
-		f.Close()
-	}
-
 	log.Printf("linking all dir in %s", s.Cfg.RootPath)
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
 	log.Println("save completed")
-
-	s.generateSiteMap()
+	generateTagPage(s)
+	generateSiteMap(s)
 	s.public = http.FileServer(http.Dir(s.publicPath))
 	s.clearOldTmp(s.publicPath)
 	return nil
