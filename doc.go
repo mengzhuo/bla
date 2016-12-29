@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/russross/blackfriday"
@@ -55,11 +56,36 @@ func newDoc(r io.Reader) (d *Doc, err error) {
 	return
 }
 
+func loadData(s *Handler) {
+	log.Print("Loading docs from:", s.docPath)
+
+	s.mu.Lock()
+	s.sortDocs = []*Doc{}
+	s.docs = map[string]*Doc{}
+	s.tags = map[string][]*Doc{}
+	s.mu.Unlock()
+
+	f, err := os.Open(s.docPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	err = filepath.Walk(s.docPath, s.docWalker)
+	if err != nil {
+		log.Print(err)
+	}
+	sort.Sort(docsByTime(s.sortDocs))
+	log.Print("Statistic docs....")
+	log.Printf("Docs:%15d", len(s.docs))
+	log.Printf("Tags:%15d", len(s.tags))
+}
+
 func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	start := time.Now()
+	//start := time.Now()
 	if info.IsDir() || filepath.Ext(info.Name()) != ".md" {
 		return nil
 	}
@@ -87,8 +113,10 @@ func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
 	}
 	s.docs[doc.SlugTitle] = doc
 	s.sortDocs = append(s.sortDocs, doc)
-	log.Printf("loaded doc:%s in %s", doc.SlugTitle,
-		time.Now().Sub(start).String())
+	/*
+		log.Printf("loaded doc:%s in %s", doc.SlugTitle,
+			time.Now().Sub(start).String())
+	*/
 	return nil
 }
 
