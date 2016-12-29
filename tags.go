@@ -8,7 +8,10 @@ import (
 
 func generateTagPage(s *Handler) (err error) {
 
-	defer ErrOrOk("generate tags", err)
+	err = os.MkdirAll(filepath.Join(s.publicPath, "tags"), 0700)
+	if err != nil {
+		return
+	}
 
 	for tagName, docs := range s.tags {
 		err = makeTagPage(s, tagName, docs)

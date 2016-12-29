@@ -19,6 +19,5 @@ func generateSiteMap(h *Handler) (err error) {
 
 	err = ioutil.WriteFile(filepath.Join(h.publicPath, "sitemap.txt"),
 		buf.Bytes(), os.ModePerm)
-	ErrOrOk("generate site map", err)
 	return
 }

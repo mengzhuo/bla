@@ -15,8 +15,6 @@ import (
 
 	ini "gopkg.in/ini.v1"
 
-	"golang.org/x/net/webdav"
-
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -47,24 +45,9 @@ func NewHandler(cfgPath string) *Handler {
 
 	h.loadConfig()
 	h.watch()
-	h.loadWebDav()
+	loadWebDav(h)
 
 	return h
-}
-
-func (s *Handler) loadWebDav() {
-
-	fs := webdav.Dir(s.Cfg.RootPath)
-	ls := webdav.NewMemLS()
-
-	handler := &webdav.Handler{
-		Prefix:     "/fs",
-		FileSystem: fs,
-		LockSystem: ls,
-	}
-	a := NewAuthRateByIPHandler(s.Cfg.HostName, handler, s.Cfg.UserName,
-		s.Cfg.Password, 3)
-	s.webfs = a
 }
 
 func (s *Handler) watch() {
@@ -76,8 +59,8 @@ func (s *Handler) watch() {
 
 	go func() {
 		// init all docs
-		s.loadData()
-		s.loadTemplate()
+		loadData(s)
+		loadTemplate(s)
 		err := s.saveAll()
 		if err != nil {
 			log.Fatal("can't save docs:", err)
@@ -105,8 +88,8 @@ func (s *Handler) watch() {
 			case <-ticker.C:
 				if docChange {
 					docChange = false
-					s.loadData()
-					s.loadTemplate()
+					loadData(s)
+					loadTemplate(s)
 				}
 
 				if rootChange {
@@ -154,6 +137,8 @@ func clearOldTmp(exclude string) (err error) {
 	return nil
 }
 
+type handleFunc func(s *Handler) error
+
 func (s *Handler) saveAll() (err error) {
 
 	s.publicPath, err = ioutil.TempDir("", "bla")
@@ -161,81 +146,38 @@ func (s *Handler) saveAll() (err error) {
 		return err
 	}
 
-	log.Print("Saving all docs...")
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	log.Println("Deleting public...")
-	err = os.RemoveAll(s.publicPath)
-	if err != nil {
-		return
-	}
-
-	var f *os.File
 	err = os.MkdirAll(s.publicPath, 0700)
 	if err != nil {
 		return
 	}
-	log.Printf("saving all docs...")
-	for _, doc := range s.docs {
-		f, err = os.Create(filepath.Join(s.publicPath, doc.SlugTitle))
+
+	for k, function := range map[string]handleFunc{
+		"index":    generateIndex,
+		"all page": generateAllPage,
+		"sitemap":  generateSiteMap,
+		"tag":      generateTagPage} {
+
+		err = function(s)
 		if err != nil {
-			return
+			log.Printf("generate:%-15s ... [ERR]", k)
+			return err
 		}
-		if err = s.tpl.ExecuteTemplate(f, "single",
-			&singleData{s, doc.Title, doc}); err != nil {
-			return
-		}
-		f.Close()
-	}
-
-	var docs []*Doc
-	if len(s.sortDocs) > s.Cfg.HomeDocCount {
-		docs = s.sortDocs[:s.Cfg.HomeDocCount]
-	} else {
-		docs = s.sortDocs
-	}
-
-	f, err = os.Create(filepath.Join(s.publicPath, "index.html"))
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	if err = s.tpl.ExecuteTemplate(f, "index",
-		&mulDocData{s, "", docs}); err != nil {
-		return
-	}
-
-	log.Printf("saving all tags...")
-	err = os.MkdirAll(filepath.Join(s.publicPath, "tags"), 0700)
-	if err != nil {
-		return
-	}
-
-	f, err = os.Create(filepath.Join(s.publicPath, "all"))
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	if err = s.tpl.ExecuteTemplate(f, "all",
-		&mulDocData{s, "", s.sortDocs}); err != nil {
-		return
+		log.Printf("generate:%-15s ... [OK]", k)
 	}
 
 	log.Printf("linking all dir in %s", s.Cfg.RootPath)
 	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
 	log.Println("save completed")
 
-	generateTagPage(s)
-	generateSiteMap(s)
 	s.public = http.FileServer(http.Dir(s.publicPath))
 	clearOldTmp(s.publicPath)
 	return nil
 }
 
-func (s *Handler) loadData() {
+func loadData(s *Handler) {
 	log.Print("Loading docs from:", s.docPath)
 
 	s.mu.Lock()
@@ -324,7 +266,7 @@ func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Handler) loadTemplate() {
+func loadTemplate(s *Handler) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
