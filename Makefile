@@ -1,5 +1,4 @@
 VERSION := $(shell git describe --tags)
-BLA_RACE?=$(BLA_RACE)
 DESTDIR?=.tmpBuildRoot
 
 .PHONY: binary
@@ -16,7 +15,7 @@ clean:
 build:
 	mkdir -p src/github.com/mengzhuo
 	@-ln -s ${PWD} ${PWD}/src/github.com/mengzhuo/bla && ([ $$? -eq 0 ] )
-	go build -o bla -ldflags '-X main.Version=${VERSION}' ${BLA_RACE} cmd/bla/main.go
+	go build -o bla -ldflags '-X main.Version=${VERSION}' cmd/bla/main.go
 
 .PHONY: pkg
 pkg:
