@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-func generateIndex(s *Handler) (err error) {
+func generateIndex(s *Handler, public string) (err error) {
 
 	var docs []*Doc
 	if len(s.sortDocs) > s.Cfg.HomeDocCount {
@@ -14,7 +14,7 @@ func generateIndex(s *Handler) (err error) {
 		docs = s.sortDocs
 	}
 
-	f, err := os.Create(filepath.Join(s.publicPath, "index.html"))
+	f, err := os.Create(filepath.Join(public, "index.html"))
 	if err != nil {
 		return
 	}
@@ -25,11 +25,11 @@ func generateIndex(s *Handler) (err error) {
 
 }
 
-func generateDoc(s *Handler) (err error) {
+func generateDoc(s *Handler, public string) (err error) {
 
 	for _, doc := range s.docs {
 		var f *os.File
-		f, err = os.Create(filepath.Join(s.publicPath, doc.SlugTitle))
+		f, err = os.Create(filepath.Join(public, doc.SlugTitle))
 		if err != nil {
 			return
 		}

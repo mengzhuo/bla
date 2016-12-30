@@ -6,15 +6,15 @@ import (
 	"sort"
 )
 
-func generateTagPage(s *Handler) (err error) {
+func generateTagPage(s *Handler, publicPath string) (err error) {
 
-	err = os.MkdirAll(filepath.Join(s.publicPath, "tags"), 0700)
+	err = os.MkdirAll(filepath.Join(publicPath, "tags"), 0700)
 	if err != nil {
 		return
 	}
 
 	for tagName, docs := range s.tags {
-		err = makeTagPage(s, tagName, docs)
+		err = makeTagPage(s, publicPath, tagName, docs)
 		if err != nil {
 			return
 		}
@@ -22,10 +22,10 @@ func generateTagPage(s *Handler) (err error) {
 	return nil
 }
 
-func makeTagPage(s *Handler, tagName string, docs []*Doc) (err error) {
+func makeTagPage(s *Handler, pub string, tagName string, docs []*Doc) (err error) {
 	var f *os.File
 
-	f, err = os.Create(filepath.Join(s.publicPath, "/tags/", tagName))
+	f, err = os.Create(filepath.Join(pub, "/tags/", tagName))
 	if err != nil {
 		return
 	}

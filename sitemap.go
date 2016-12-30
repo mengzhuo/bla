@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func generateSiteMap(h *Handler) (err error) {
+func generateSiteMap(h *Handler, public string) (err error) {
 
 	buf := bytes.NewBuffer(nil)
 	for _, d := range h.sortDocs {
@@ -17,7 +17,7 @@ func generateSiteMap(h *Handler) (err error) {
 			path.Join(h.Cfg.BaseURL, d.SlugTitle))
 	}
 
-	err = ioutil.WriteFile(filepath.Join(h.publicPath, "sitemap.txt"),
+	err = ioutil.WriteFile(filepath.Join(public, "sitemap.txt"),
 		buf.Bytes(), os.ModePerm)
 	return
 }

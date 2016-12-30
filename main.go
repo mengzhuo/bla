@@ -134,7 +134,7 @@ func clearOldTmp(exclude string) (err error) {
 	return nil
 }
 
-type handleFunc func(s *Handler) error
+type handleFunc func(s *Handler, public string) error
 
 func saveAll(s *Handler) (err error) {
 
@@ -154,7 +154,7 @@ func saveAll(s *Handler) (err error) {
 		"docs":     generateSingle,
 	} {
 		start := time.Now()
-		err = function(s)
+		err = function(s, newPub)
 		cost := time.Now().Sub(start)
 		if err != nil {
 			log.Printf("generate:%-15s ... [ERR]", k)
@@ -163,7 +163,7 @@ func saveAll(s *Handler) (err error) {
 		log.Printf("generate:%-15s ... [OK][%s]", k, cost)
 	}
 
-	filepath.Walk(s.Cfg.RootPath, s.linkToPublic)
+	filepath.Walk(s.Cfg.RootPath, wrapLinkToPublic(s, newPub))
 
 	s.publicPath = newPub
 	s.public = http.FileServer(http.Dir(s.publicPath))

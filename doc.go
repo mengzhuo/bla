@@ -56,10 +56,10 @@ func newDoc(r io.Reader) (d *Doc, err error) {
 	return
 }
 
-func generateSingle(s *Handler) (err error) {
+func generateSingle(s *Handler, pub string) (err error) {
 
 	for slugTitle, doc := range s.docs {
-		f, err := os.Create(filepath.Join(s.publicPath, slugTitle))
+		f, err := os.Create(filepath.Join(pub, slugTitle))
 		if err != nil {
 			return err
 		}

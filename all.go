@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 )
 
-func generateAllPage(s *Handler) (err error) {
+func generateAllPage(s *Handler, publicPath string) (err error) {
 
-	f, err := os.Create(filepath.Join(s.publicPath, "all"))
+	f, err := os.Create(filepath.Join(publicPath, "all"))
 	if err != nil {
 		return
 	}
