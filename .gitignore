@@ -2,3 +2,4 @@
 .tmpBuildRoot
 pkg
 vendor/.cache
+self.config.ini
