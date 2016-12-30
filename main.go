@@ -15,6 +15,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
+const (
+	Version = "dev"
+)
+
 // Initialize
 type Handler struct {
 	cfgPath string
