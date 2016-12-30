@@ -1,0 +1,39 @@
+[submodule "vendor/github.com/beorn7/perks"]
+	path = vendor/github.com/beorn7/perks
+	url = https://github.com/beorn7/perks
+[submodule "vendor/github.com/fsnotify/fsnotify"]
+	path = vendor/github.com/fsnotify/fsnotify
+	url = https://github.com/fsnotify/fsnotify
+[submodule "vendor/github.com/golang/protobuf"]
+	path = vendor/github.com/golang/protobuf
+	url = https://github.com/golang/protobuf
+[submodule "vendor/github.com/matttproud/golang_protobuf_extensions"]
+	path = vendor/github.com/matttproud/golang_protobuf_extensions
+	url = https://github.com/matttproud/golang_protobuf_extensions
+[submodule "vendor/github.com/prometheus/client_golang"]
+	path = vendor/github.com/prometheus/client_golang
+	url = https://github.com/prometheus/client_golang
+[submodule "vendor/github.com/prometheus/client_model"]
+	path = vendor/github.com/prometheus/client_model
+	url = https://github.com/prometheus/client_model
+[submodule "vendor/github.com/prometheus/common"]
+	path = vendor/github.com/prometheus/common
+	url = https://github.com/prometheus/common
+[submodule "vendor/github.com/prometheus/procfs"]
+	path = vendor/github.com/prometheus/procfs
+	url = https://github.com/prometheus/procfs
+[submodule "vendor/github.com/russross/blackfriday"]
+	path = vendor/github.com/russross/blackfriday
+	url = https://github.com/russross/blackfriday
+[submodule "vendor/github.com/shurcooL/sanitized_anchor_name"]
+	path = vendor/github.com/shurcooL/sanitized_anchor_name
+	url = https://github.com/shurcooL/sanitized_anchor_name
+[submodule "vendor/golang.org/x/net"]
+	path = vendor/golang.org/x/net
+	url = https://go.googlesource.com/net
+[submodule "vendor/golang.org/x/sys"]
+	path = vendor/golang.org/x/sys
+	url = https://go.googlesource.com/sys
+[submodule "vendor/gopkg.in/ini.v1"]
+	path = vendor/gopkg.in/ini.v1
+	url = https://gopkg.in/ini.v1
