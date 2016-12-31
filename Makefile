@@ -13,8 +13,6 @@ clean:
 
 .PHONY: build
 build:
-	mkdir -p src/github.com/mengzhuo
-	@-ln -s ${PWD} ${PWD}/src/github.com/mengzhuo/bla && ([ $$? -eq 0 ] )
 	go build -o bla -ldflags '-X main.Version=${VERSION}' cmd/bla/main.go
 
 .PHONY: pkg
