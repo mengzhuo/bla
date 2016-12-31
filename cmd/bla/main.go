@@ -3,6 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/mengzhuo/bla"
 )
@@ -24,5 +28,18 @@ func main() {
 		fmt.Println("bla version:", bla.Version)
 		return
 	}
+	go listenToUSR1()
 	bla.ListenAndServe(*configPath)
+}
+
+func listenToUSR1() {
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGUSR1)
+		for range c {
+			log.Print("got reload cert signal")
+			bla.LoadCertificate()
+		}
+	}()
 }

@@ -28,6 +28,7 @@ var (
 		Name:      "requests_count",
 		Help:      "The total number of http request",
 	})
+
 	httpRequestDurationSeconds = prometheus.NewSummary(
 		prometheus.SummaryOpts{
 			Namespace: "http",
@@ -37,22 +38,23 @@ var (
 		})
 )
 
-func loadMetric(addr string) {
+func listenMetric(addr string) {
 
 	prometheus.MustRegister(httpRequestCount)
 	prometheus.MustRegister(httpRequestDurationSeconds)
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(addr, nil)
+
 }
 
 // Config ---------------------
 
 type ServerConfig struct {
-	Certfile      string
-	Keyfile       string
-	Listen        string
-	MetricListen  string
-	AccessLogPath string
+	Certfile         string
+	Keyfile          string
+	Listen           string
+	MetricListenAddr string
+	AccessLogPath    string
 }
 
 func ListenAndServe(cfgPath string) {
@@ -62,15 +64,18 @@ func ListenAndServe(cfgPath string) {
 	}
 
 	cfg = &ServerConfig{
-		"", "", ":8080",
-		"access.log", ""}
+		"", "",
+		":8080",
+		"127.0.0.1:9200",
+		"access.log",
+	}
 
 	raw.MapTo(cfg)
 
 	log.Printf("pid:%d", os.Getpid())
 
-	if cfg.MetricListen != "" {
-		go loadMetric(cfg.MetricListen)
+	if cfg.MetricListenAddr != "" {
+		go listenMetric(cfg.MetricListenAddr)
 	}
 
 	log.Printf("Server:%v", cfg)
@@ -92,7 +97,6 @@ func ListenAndServe(cfgPath string) {
 		log.Fatal(server.ListenAndServeTLS(cfg.Certfile, cfg.Keyfile))
 	}
 	server.ListenAndServe()
-
 }
 
 type LogWriter struct {
