@@ -39,7 +39,7 @@ var (
 )
 
 func listenMetric(addr string) {
-
+	log.Printf("prometheus metric at %s/%s", addr, "metrics")
 	prometheus.MustRegister(httpRequestCount)
 	prometheus.MustRegister(httpRequestDurationSeconds)
 	http.Handle("/metrics", promhttp.Handler())
