@@ -32,7 +32,6 @@ func ListenLEHTTP(cfgPath string) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("LE: %s", r.URL)
-
 		if strings.HasPrefix(r.URL.Path, "/.well-known") {
 			dir.ServeHTTP(w, r)
 		} else {
