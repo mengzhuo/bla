@@ -36,7 +36,6 @@ func ListenLEHTTP(cfgPath string) {
 			dir.ServeHTTP(w, r)
 		} else {
 			w.Header().Set("Location", fmt.Sprintf("https://%s", path.Join(r.Host, r.URL.Path)))
-			w.Header().Set("Strict-Transport-Security", "max-age=31536000")
 			w.WriteHeader(http.StatusPermanentRedirect)
 		}
 	})
