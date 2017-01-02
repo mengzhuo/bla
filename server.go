@@ -128,6 +128,7 @@ func logTimeAndStatus(cfg *ServerConfig, handler http.Handler) http.Handler {
 		}
 		writer = file
 		log.Printf("Access Log to file: %s", cfg.AccessLogPath)
+		file.Seek(0, os.SEEK_END)
 	} else {
 		writer = os.Stdout
 	}
@@ -142,7 +143,7 @@ func logTimeAndStatus(cfg *ServerConfig, handler http.Handler) http.Handler {
 		writer.statusCode = 200
 
 		if cfg.Certfile != "" {
-			writer.ResponseWriter.Header().Add("Strict-Transport-Security", "max-age=31536000")
+			writer.ResponseWriter.Header().Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
 		}
 		handler.ServeHTTP(writer, r)
 
