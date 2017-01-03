@@ -36,7 +36,7 @@ func ListenLEHTTP(cfgPath string) {
 			dir.ServeHTTP(w, r)
 		} else {
 			w.Header().Set("Location", fmt.Sprintf("https://%s", path.Join(r.Host, r.URL.Path)))
-			w.WriteHeader(http.StatusPermanentRedirect)
+			w.WriteHeader(http.StatusMovedPermanently)
 		}
 	})
 	http.ListenAndServe(cfg.ListenLEAddr, nil)
