@@ -22,12 +22,14 @@ var (
 	server  *http.Server
 	cfg     *ServerConfig
 
-	httpRequestCount = prometheus.NewCounter(prometheus.CounterOpts{
-		Namespace: "http",
-		Subsystem: "request",
-		Name:      "requests_count",
-		Help:      "The total number of http request",
-	})
+	httpRequestCount = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "http",
+			Subsystem: "requests",
+			Name:      "total",
+			Help:      "The total number of http request",
+		},
+		[]string{"handler"})
 
 	httpRequestDurationSeconds = prometheus.NewSummary(
 		prometheus.SummaryOpts{
