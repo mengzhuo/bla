@@ -155,7 +155,6 @@ func logTimeAndStatus(cfg *ServerConfig, handler http.Handler) http.Handler {
 			delta, writer.statusCode)
 
 		httpRequestDurationSeconds.Observe(delta.Seconds())
-		httpRequestCount.Inc()
 
 		logPool.Put(writer)
 	})
