@@ -94,7 +94,6 @@ func ListenAndServe(cfgPath string) {
 	if cfg.Certfile != "" && cfg.Keyfile != "" {
 		// for higher score in ssllab
 		server.TLSConfig = &tls.Config{
-			MinVersion:               tls.VersionTLS12,
 			PreferServerCipherSuites: true,
 		}
 		server.TLSConfig.GetCertificate = getCertificate
