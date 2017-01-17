@@ -4,8 +4,9 @@
 {{ range .Docs }}
 	<li>
 		<h3><a href="{{.SlugTitle}}">{{.Title}}</a></h3>
-		{{ range .Tags }}
-			<a href="/tags/{{.}}">{{.}}</a>|
+		{{ range $i, $t := .Tags }}
+			<a href="/tags/{{$t}}" class="btn-outline btn-small">{{$t}}</a>
+            {{if not $i }}&nbsp;|&nbsp;{{end}}
 		{{end}}
 	</li>
 
