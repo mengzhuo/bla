@@ -7,3 +7,4 @@ set -e
 if [ -x /bin/systemctl ]; then
 	systemctl daemon-reload
 	systemctl restart bla
+fi
