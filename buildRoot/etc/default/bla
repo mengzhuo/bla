@@ -3,11 +3,5 @@
 ARGS="-config /etc/bla/config.ini"
 
 # Usage of bla:
-#   -addr string
-#     	listen port (default ":8080")
-#   -cert string
-#     	cert file path
 #   -config string
-#     	default config path (default "config.json")
-#   -key string
-#     	cert file path
+#     	default config path (default "config.ini")

@@ -17,15 +17,16 @@ const (
 
 var (
 	configPath = flag.String("config", DefaultConfig, "default config path")
-	version    = flag.Bool("version", false, "show version")
+	varg       = flag.Bool("v", false, "show version")
+	Version    = "dev"
 )
 
 func main() {
 	// defer profile.Start().Stop()
 	flag.Parse()
 
-	if *version {
-		fmt.Println("bla version:", bla.Version)
+	if *varg {
+		fmt.Println("bla version:", Version)
 		return
 	}
 	go listenToUSR1()
