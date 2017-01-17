@@ -70,7 +70,7 @@ func ListenAndServe(cfgPath string) {
 	cfg = &ServerConfig{
 		"", "",
 		":8080",
-		"127.0.0.1:9200",
+		"",
 		"access.log",
 		"",
 		"",
