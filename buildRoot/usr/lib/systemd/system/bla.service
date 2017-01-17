@@ -6,7 +6,8 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/bla -config /etc/bla/config.ini
+EnvironmentFile=/etc/default/bla
+ExecStart=/usr/local/bin/bla $ARGS
 Restart=on-failure
 RestartSec=30
 

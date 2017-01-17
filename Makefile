@@ -25,7 +25,7 @@ pkg:
 	cp bla ${DESTDIR}/usr/local/bin/
 
 deb: clean build pkg
-	fpm -t deb -s dir -n bla -v $(VERSION:v%=%) -C ${DESTDIR}
+	fpm -t deb -s dir -n bla -v $(VERSION:v%=%) -C ${DESTDIR} --after-install buildRoot/etc/bla/postinstall.sh
 
 rpm: clean build pkg
 	fpm -t rpm -s dir -n bla -v ${VERSION} -C ${DESTDIR} 
