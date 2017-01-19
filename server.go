@@ -147,9 +147,9 @@ func logTimeAndStatus(cfg *ServerConfig, handler http.Handler) http.Handler {
 		handler.ServeHTTP(writer, r)
 
 		delta := time.Now().Sub(start)
-		accessLogger.Printf("%s %s %s %s %d",
+		accessLogger.Printf(`%s %s %s %s %d "%s"`,
 			r.RemoteAddr, r.Method, r.URL.Path,
-			delta, writer.statusCode)
+			delta, writer.statusCode, r.UserAgent())
 
 		httpRequestDurationSeconds.Observe(delta.Seconds())
 
