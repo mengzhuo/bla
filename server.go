@@ -57,8 +57,6 @@ type ServerConfig struct {
 	Listen           string
 	MetricListenAddr string
 	AccessLogPath    string
-	ListenLEAddr     string
-	LEDir            string
 }
 
 func ListenAndServe(cfgPath string) {
@@ -72,8 +70,6 @@ func ListenAndServe(cfgPath string) {
 		":8080",
 		"",
 		"access.log",
-		"",
-		"",
 	}
 
 	raw.MapTo(cfg)

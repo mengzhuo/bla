@@ -30,7 +30,6 @@ func main() {
 		return
 	}
 	go listenToUSR1()
-	go bla.ListenLEHTTP(*configPath)
 	bla.ListenAndServe(*configPath)
 }
 
