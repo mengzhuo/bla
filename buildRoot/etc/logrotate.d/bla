@@ -5,6 +5,7 @@
   delaycompress
   missingok
   notifempty
+  copytruncate
 
   compressoptions -9
 }
