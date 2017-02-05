@@ -15,7 +15,8 @@ func wrapLinkToPublic(s *Handler, public string) filepath.WalkFunc {
 		}
 
 		if strings.Count(path, "/")-strings.Count(s.Cfg.RootPath, "/") > 1 {
-			return nil
+			// not base dir skip it...
+			return filepath.SkipDir
 		}
 
 		switch base := filepath.Base(path); base {
