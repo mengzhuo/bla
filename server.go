@@ -46,7 +46,6 @@ func listenMetric(addr string) {
 	prometheus.MustRegister(httpRequestDurationSeconds)
 	http.Handle("/metrics", promhttp.Handler())
 	http.ListenAndServe(addr, nil)
-
 }
 
 // Config ---------------------
@@ -106,6 +105,7 @@ type LogWriter struct {
 func (l *LogWriter) WriteHeader(i int) {
 	l.statusCode = i
 	l.ResponseWriter.WriteHeader(i)
+
 }
 func logTimeAndStatus(cfg *ServerConfig, handler http.Handler) http.Handler {
 
@@ -142,7 +142,8 @@ func logTimeAndStatus(cfg *ServerConfig, handler http.Handler) http.Handler {
 		}
 		handler.ServeHTTP(writer, r)
 
-		delta := time.Now().Sub(start)
+		delta := time.Since(start)
+
 		accessLogger.Printf(`%s %s %s %s %d "%s"`,
 			r.RemoteAddr, r.Method, r.URL.Path,
 			delta, writer.statusCode, r.UserAgent())
