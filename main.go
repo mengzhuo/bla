@@ -77,6 +77,9 @@ func (s *Handler) watch() {
 			case event := <-watcher.Events:
 				switch ext := filepath.Ext(event.Name); ext {
 				case ".md", ".tmpl":
+					if strings.HasPrefix(event.Name, ".") {
+						continue
+					}
 					log.Println("modified file:", event.Name)
 					docChange = true
 				case ".swp":

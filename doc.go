@@ -59,7 +59,8 @@ func newDoc(r io.Reader) (d *Doc, err error) {
 func generateSingle(s *Handler, pub string) (err error) {
 
 	for slugTitle, doc := range s.docs {
-		f, err := os.Create(filepath.Join(pub, slugTitle))
+		fp := filepath.Join(pub, slugTitle)
+		f, err := os.Create(fp)
 		if err != nil {
 			return err
 		}
@@ -68,6 +69,11 @@ func generateSingle(s *Handler, pub string) (err error) {
 		err = s.tpl.ExecuteTemplate(f, "single", &singleData{s, doc.Title, doc})
 		if err != nil {
 			return err
+		}
+		err = os.Chtimes(fp, time.Now(), doc.Time)
+		if err != nil {
+			// not a big deal...
+			log.Print(err)
 		}
 	}
 	return nil
