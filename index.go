@@ -1,8 +1,10 @@
 package bla
 
 import (
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 func generateIndex(s *Handler, public string) (err error) {
@@ -29,7 +31,8 @@ func generateDoc(s *Handler, public string) (err error) {
 
 	for _, doc := range s.docs {
 		var f *os.File
-		f, err = os.Create(filepath.Join(public, doc.SlugTitle))
+		fp := filepath.Join(public, doc.SlugTitle)
+		f, err = os.Create(fp)
 		if err != nil {
 			return
 		}
@@ -38,6 +41,11 @@ func generateDoc(s *Handler, public string) (err error) {
 			&singleData{s, doc.Title, doc})
 		if err != nil {
 			return
+		}
+		err = os.Chtimes(fp, time.Now(), doc.Time)
+		if err != nil {
+			// not a big deal...
+			log.Print(err)
 		}
 	}
 	return nil
