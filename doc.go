@@ -25,6 +25,7 @@ type Doc struct {
 	Title     string
 	SlugTitle string
 	Time      time.Time
+	ModTime   time.Time
 	Tags      []string
 	Public    bool
 
@@ -70,7 +71,7 @@ func generateSingle(s *Handler, pub string) (err error) {
 		if err != nil {
 			return err
 		}
-		err = os.Chtimes(fp, time.Now(), doc.Time)
+		err = os.Chtimes(fp, time.Now(), doc.ModTime)
 		if err != nil {
 			// not a big deal...
 			log.Print(err)
@@ -140,6 +141,7 @@ func (s *Handler) docWalker(p string, info os.FileInfo, err error) error {
 		log.Printf("loaded doc:%s in %s", doc.SlugTitle,
 			time.Now().Sub(start).String())
 	*/
+	doc.ModTime = info.ModTime()
 	return nil
 }
 
