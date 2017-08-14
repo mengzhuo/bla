@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/lucas-clemente/quic-go/h2quic"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -92,7 +93,8 @@ func ListenAndServe(cfgPath string) {
 		server.TLSConfig.GetCertificate = getCertificate
 		log.Printf("TLS:%s, %s", cfg.Certfile, cfg.Keyfile)
 		LoadCertificate()
-		log.Fatal(server.ListenAndServeTLS(cfg.Certfile, cfg.Keyfile))
+		log.Fatal(h2quic.ListenAndServe(cfg.Listen, cfg.Certfile, cfg.Keyfile, server.Handler))
+		//log.Fatal(server.ListenAndServeTLS(cfg.Certfile, cfg.Keyfile))
 	}
 	server.ListenAndServe()
 }
