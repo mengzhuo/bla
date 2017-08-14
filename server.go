@@ -83,17 +83,11 @@ func ListenAndServe(cfgPath string) {
 	log.Printf("Server:%v", cfg)
 
 	h := NewHandler(cfgPath)
-
 	lh := logTimeAndStatus(cfg, h)
-	server = &http.Server{Addr: cfg.Listen, Handler: lh}
 
 	if cfg.Certfile != "" && cfg.Keyfile != "" {
 		// for higher score in ssllab
-		server.TLSConfig = &tls.Config{}
-		server.TLSConfig.GetCertificate = getCertificate
-		log.Printf("TLS:%s, %s", cfg.Certfile, cfg.Keyfile)
-		LoadCertificate()
-		log.Fatal(h2quic.ListenAndServe(cfg.Listen, cfg.Certfile, cfg.Keyfile, server.Handler))
+		log.Fatal(h2quic.ListenAndServe(cfg.Listen, cfg.Certfile, cfg.Keyfile, lh))
 		//log.Fatal(server.ListenAndServeTLS(cfg.Certfile, cfg.Keyfile))
 	}
 	server.ListenAndServe()
