@@ -97,6 +97,7 @@ func ListenAndServe(cfgPath string) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Print("listen quic on udp:%s", cfg.Listen)
 		go quic.Serve(pln)
 
 		// for higher score in ssllab
