@@ -148,6 +148,8 @@ func logTimeAndStatus(cfg *ServerConfig, handler http.Handler) http.Handler {
 
 		if cfg.Certfile != "" {
 			writer.ResponseWriter.Header().Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+			writer.ResponseWriter.Header().Add("alt-svc", `quic=":443"; ma=2592000; v="38,37,36"`)
+			// alt-svc:quic=":443"; ma=2592000; v="39,38,37,35"
 		}
 		handler.ServeHTTP(writer, r)
 
