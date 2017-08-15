@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -84,11 +85,22 @@ func ListenAndServe(cfgPath string) {
 
 	h := NewHandler(cfgPath)
 	lh := logTimeAndStatus(cfg, h)
+	server := &http.Server{Handler: lh, Addr: cfg.Listen}
 
 	if cfg.Certfile != "" && cfg.Keyfile != "" {
+
+		quic := &h2quic.Server{Server: server}
+		quic.TLSConfig = &tls.Config{}
+		quic.TLSConfig.GetCertificate = getCertificate
+
+		pln, err := net.ListenPacket("udp", cfg.Listen)
+		if err != nil {
+			log.Fatal(err)
+		}
+		go quic.Serve(pln)
+
 		// for higher score in ssllab
-		log.Fatal(h2quic.ListenAndServe(cfg.Listen, cfg.Certfile, cfg.Keyfile, lh))
-		//log.Fatal(server.ListenAndServeTLS(cfg.Certfile, cfg.Keyfile))
+		log.Fatal(server.ListenAndServeTLS(cfg.Certfile, cfg.Keyfile))
 	}
 	server.ListenAndServe()
 }
