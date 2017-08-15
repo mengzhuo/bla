@@ -37,3 +37,6 @@
 [submodule "vendor/gopkg.in/ini.v1"]
 	path = vendor/gopkg.in/ini.v1
 	url = https://gopkg.in/ini.v1
+[submodule "vendor/github.com/lucas-clemente/quic-go"]
+	path = vendor/github.com/lucas-clemente/quic-go
+	url = https://github.com/lucas-clemente/quic-go
