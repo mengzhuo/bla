@@ -88,7 +88,7 @@ func ListenAndServe(cfgPath string) {
 	server := &http.Server{Handler: lh, Addr: cfg.Listen}
 
 	if cfg.Certfile != "" && cfg.Keyfile != "" {
-
+		LoadCertificate()
 		quic := &h2quic.Server{Server: server}
 		quic.TLSConfig = &tls.Config{}
 		quic.TLSConfig.GetCertificate = getCertificate
