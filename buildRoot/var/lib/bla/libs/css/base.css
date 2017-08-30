@@ -35,6 +35,6 @@ h2,h3,h4 {color:#375EAB;}
 .tag-row a {padding:3px 5px;border:1px solid #666;border-radius:5px;}
 @media screen and (max-width:624px){ 
     #topbar {position: fixed; width: 100%; top: 0; box-shadow: 0 2px 5px #ccc;padding:0;}
-    #articles {margin-top:4em;}
+    main {padding:3em 1em 1em !important;}
 }
 @media screen and (max-width:385px){#topbar form {display:none;}}
